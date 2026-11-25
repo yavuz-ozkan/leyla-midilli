@@ -24,6 +24,17 @@ for (const v of cfg.variants) for (const c of cfg.colors) {
   clips.push({ id: `ask/${v.id}-${c.id}`, voice: 'pony', tts: `[excited] ${phrase}! ${phrase} nerede?` });
 }
 for (const r of cfg.rooms) clips.push({ id: 'word/room-' + r.id, voice: 'word', tts: r.tr + '.' });
+// counting: "İki elma." and "İki elma! İki elma nerede?" for each food, and the pony counting "Bir! İki!"
+for (const id of cfg.counted.items) for (const n of cfg.counted.numbers) {
+  const phrase = `${n.tr} ${cfg.items.find(i => i.id === id).tr.toLocaleLowerCase('tr')}`;
+  clips.push({ id: `word/${id}-x${n.n}`, voice: 'word', tts: phrase + '.' });
+  clips.push({ id: `ask/${id}-x${n.n}`, voice: 'pony', tts: `[excited] ${phrase}! ${phrase} nerede?` });
+}
+for (const n of cfg.counted.numbers) clips.push({ id: 'num/' + n.n, voice: 'pony', tts: `[excited] ${n.tr}!` });
+// for the sticker book: each color on its own, the things that come in colors, and the two extra page names
+for (const c of cfg.colors) clips.push({ id: 'word/renk-' + c.id, voice: 'word', tts: c.tr + '.' });
+for (const v of cfg.variants) clips.push({ id: 'word/' + v.id, voice: 'word', tts: v.tr[0].toLocaleUpperCase('tr') + v.tr.slice(1) + '.' });
+for (const x of cfg.extraWords) clips.push({ id: 'word/' + x.id, voice: 'word', tts: x.tr + '.' });
 for (const n of cfg.names) clips.push({ id: 'name/' + n.id, voice: 'pony', tts: `[excited] ${n.tts}!` });
 for (const l of cfg.lines) clips.push({ id: 'line/' + l.id, voice: 'pony', tts: l.tts });
 

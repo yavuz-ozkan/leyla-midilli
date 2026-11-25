@@ -19,6 +19,7 @@ body[data-room="yemek"]{--wall:#fff3d6;--wall-2:#ffe8bd;--floor:#d9efc2}
 body[data-room="gezinti"]{--wall:#dff4ff;--wall-2:#cfecff;--floor:#bfe8a6}   /* outdoors: sky and grass */
 body.ride #app{animation:roll 1.1s linear infinite}                           /* the world rolls past while she trots */
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%}
 body{background:var(--wall);color:var(--ink);font-family:var(--font);font-size:16px;overflow:hidden;
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
@@ -116,6 +117,30 @@ button:focus-visible{outline:4px solid var(--berry);outline-offset:3px}
 .chip:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
 .chip.on{background:var(--berry);color:#fff}
 .ghost{position:fixed;z-index:20;pointer-events:none}
+.pick{position:relative}
+.pick.star::after,.sec.full .head::after{content:"⭐";position:absolute;top:-12px;right:-10px;font-size:1.6rem;line-height:1}
+.go.pulse{animation:hint 1s ease-in-out infinite}
+
+/* the sticker book: a page over the whole game, one box per room, a sticker for every word she has found */
+#album{position:fixed;inset:0;z-index:30;background:var(--wall);display:flex;flex-direction:column;gap:12px;overflow-y:auto;
+  padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#albumtop{display:flex;align-items:center;gap:12px;min-width:0}
+#albumtop .go{flex:none;width:64px;background:var(--berry)}
+#albumsay{flex:1;min-width:0;background:var(--paper);border:4px solid var(--ink);border-radius:22px;box-shadow:0 5px 0 var(--ink);padding:4px 14px;min-height:60px;
+  display:flex;flex-direction:column;justify-content:center;line-height:1.05}
+#albumword{font-weight:800;font-size:clamp(1.3rem,4.4vw,2.1rem);overflow-wrap:anywhere}
+#albumgloss{font-family:var(--font-small);font-weight:700;font-size:.8rem;color:var(--soft)}
+#albumcount{flex:none;font-weight:800;font-size:clamp(1.1rem,3.4vw,1.6rem);background:var(--sun);border:4px solid var(--ink);border-radius:999px;padding:2px 14px;box-shadow:0 4px 0 var(--ink);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.sec{flex:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px;background:var(--paper);border:4px solid var(--ink);border-radius:24px;padding:12px;box-shadow:0 5px 0 var(--ink)}
+.sticker{position:relative;aspect-ratio:1;background:#fff;border:3px solid var(--ink);border-radius:18px;padding:6px;display:grid;place-items:center}
+.sticker svg{width:100%;height:100%;pointer-events:none}
+.sticker.head{background:var(--sun);border-width:4px}
+.sticker.locked{border-style:dashed;background:transparent}
+.sticker.locked svg{filter:grayscale(1);opacity:.2}
+.sticker.wobble{animation:wobble .5s}
+.sticker:active{transform:translateY(2px)}
 
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes jump{0%,100%{transform:translateY(0)}40%{transform:translateY(-30px) rotate(-3deg)}70%{transform:translateY(-6px)}}
@@ -304,6 +329,15 @@ button:focus-visible{outline:4px solid var(--berry);outline-offset:3px}
   <div id="shelf"></div>
 </div>
 
+<div id="album" hidden>
+  <div id="albumtop">
+    <button class="go small" id="albumclose" aria-label="Kapat"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M10 10l20 20M30 10L10 30" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg></button>
+    <div id="albumsay"><span id="albumword"></span><span id="albumgloss"></span></div>
+    <div id="albumcount"></div>
+  </div>
+  <div id="albumgrid" style="display:contents"></div>
+</div>
+
 <!-- Every recorded voice clip in one file (made by tools/make-audio.mjs). The game still runs without it, silently. -->
 <script src="audio-pack.js"></script>
 <script>
@@ -348,9 +382,12 @@ const COLORS = [
 ];
 // Things that come in the six colors and are asked for by color: "Pembe kurdele", "Mavi elbise".
 const VARIANT = { kurdele: { tr: 'kurdele', en: 'ribbon' }, elbise: { tr: 'elbise', en: 'dress' } };
+// Counting: the foods can be asked for by number, "İki elma!", and the pony counts as she eats, "Bir! İki!".
+const NUMBERS = [{ n: 1, tr: 'Bir', en: 'one' }, { n: 2, tr: 'İki', en: 'two' }, { n: 3, tr: 'Üç', en: 'three' }, { n: 4, tr: 'Dört', en: 'four' }, { n: 5, tr: 'Beş', en: 'five' }];
+const COUNTED = ['elma', 'havuc', 'muz', 'karpuz', 'armut', 'uzum', 'ekmek'];
 // The names Leyla can give the pony. She picks up to three and the pony says them all in a row.
 const NAMES = [
-  { id: 'zooey', show: 'Zooey', icon: '💜' }, { id: 'rosie', show: 'Rosie', icon: '🌹' }, { id: 'pamuk', show: 'Pamuk', icon: '🤍' }, { id: 'seker', show: 'Şeker', icon: '🍬' },
+  { id: 'zoey', show: 'Zoey', icon: '💜' }, { id: 'rosie', show: 'Rosie', icon: '🌹' }, { id: 'pamuk', show: 'Pamuk', icon: '🤍' }, { id: 'seker', show: 'Şeker', icon: '🍬' },
   { id: 'cilek', show: 'Çilek', icon: '🍓' }, { id: 'bulut', show: 'Bulut', icon: '☁️' }, { id: 'yildiz', show: 'Yıldız', icon: '⭐' }, { id: 'fistik', show: 'Fıstık', icon: '🥜' },
 ];
 const MAX_NAMES = 3;
@@ -374,6 +411,7 @@ const LINES = {
   fx_crunch: ['Kıtır kıtır!', 'Crunch crunch!'], fx_more: ['Bir tane daha istiyorum!', 'I want one more!'], done_yemek: ['Doydum! Teşekkür ederim, Leyla!', "I'm full! Thank you, Leyla!"],
   start_gezinti: ['Gezmeye gidelim! Önce beni hazırla!', "Let's go for a ride! Get me ready first!"], fx_saddle: ['Eyer tamam! Hadi bin!', 'Saddle on! Hop on!'], fx_helmet: ['Kask tamam! Güvendeyiz!', "Helmet on! We're safe!"],
   fx_ride: ['Deh! Dıgıdık, dıgıdık!', 'Giddy-up! Clip clop, clip clop!'], fx_look: ['Bak, ne güzel!', 'Look, how lovely!'], fx_wow: ['Vay canına!', 'Wow!'],
+  album: ['İşte çıkartma defterimiz!', 'Here is our sticker book!'], newsticker: ['Yeni çıkartma kazandın!', 'You won a new sticker!'], allfound: ['Hepsini buldun! Harikasın!', 'You found them all! You are wonderful!'],
   done_gezinti: ['Çüş! Geldik! Çok güzel bir gezinti oldu, Leyla!', 'Whoa! We are here! What a lovely ride, Leyla!'],
 };
 // Things too alike to be offered as each other's wrong choice.
@@ -385,7 +423,13 @@ const colorOf = {}; COLORS.forEach(c => { colorOf[c.id] = c; });
 const nameOf = {}; NAMES.forEach(n => { nameOf[n.id] = n; });
 // "elbise-mavi" is the blue one of a thing that comes in colors.
 function variantOf(id) { const k = id.lastIndexOf('-'); if (k < 1) return null; const base = id.slice(0, k), c = colorOf[id.slice(k + 1)]; return c && VARIANT[base] ? { base, color: c } : null; }
-const info = id => { const v = variantOf(id); return v ? { tr: v.color.tr + ' ' + VARIANT[v.base].tr, en: v.color.en + ' ' + VARIANT[v.base].en, hex: v.color.hex } : itemOf[id]; };
+// "elma-x3" is three of a thing that can be counted.
+function countOf(id) { const m = /^(.+)-x([1-5])$/.exec(id); return m && itemOf[m[1]] ? { base: m[1], n: +m[2] } : null; }
+const info = id => {
+  const v = variantOf(id); if (v) return { tr: v.color.tr + ' ' + VARIANT[v.base].tr, en: v.color.en + ' ' + VARIANT[v.base].en, hex: v.color.hex };
+  const c = countOf(id); if (c) return { tr: NUMBERS[c.n - 1].tr + ' ' + itemOf[c.base].tr.toLocaleLowerCase('tr'), en: c.n + ' × ' + itemOf[c.base].en };
+  return itemOf[id];
+};
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
 const chance = p => Math.random() < p;
@@ -467,7 +511,18 @@ const VARIANT_ART = {
   kurdele: c => `<path d="M28 36l-9 22 11-6 4-13z" fill="${c}" ${K}/><path d="M36 36l9 22-11-6-4-13z" fill="${c}" ${K}/><path d="M32 32L7 15Q0 32 7 49z" fill="${c}" ${K}/><path d="M32 32L57 15Q64 32 57 49z" fill="${c}" ${K}/><circle cx="32" cy="32" r="8.500" fill="${c}" ${K}/>`,
   elbise: c => `<path d="M22 5h20l5 14-7 5 14 34H10l14-34-7-5z" fill="${c}" ${K}/><path d="M25 5q7 9 14 0" fill="none" stroke="#fff" stroke-width="3.500" stroke-linecap="round"/><path d="M24 25h16" stroke="#fff" stroke-width="3.500" stroke-linecap="round"/>`,
 };
-function drawing(id) { const v = variantOf(id); return '<svg viewBox="0 0 64 64" aria-hidden="true">' + (v ? VARIANT_ART[v.base](v.color.hex) : ART[id]) + '</svg>'; }
+// Where each copy sits when a picture shows one to five of a thing: [x, y, size].
+const SPOTS = { 1: [[0, 0, 1]], 2: [[1, 17, 0.47], [33, 17, 0.47]], 3: [[17, 1, 0.45], [1, 33, 0.45], [34, 33, 0.45]],
+  4: [[2, 2, 0.45], [33, 2, 0.45], [2, 33, 0.45], [33, 33, 0.45]], 5: [[1, 1, 0.37], [39, 1, 0.37], [20, 20, 0.37], [1, 39, 0.37], [39, 39, 0.37]] };
+function drawing(id) {
+  const v = variantOf(id), c = countOf(id);
+  const inner = v ? VARIANT_ART[v.base](v.color.hex) : c ? SPOTS[c.n].map(p => `<g transform="translate(${p[0]} ${p[1]}) scale(${p[2]})">${ART[c.base]}</g>`).join('') : ART[id];
+  return '<svg viewBox="0 0 64 64" aria-hidden="true">' + inner + '</svg>';
+}
+const swatch = hex => `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6c14 0 26 9 26 23c0 9-8 11-14 11c-5 0-6 4-4 8c2 5-2 10-8 10C17 58 6 46 6 32S18 6 32 6z" fill="${hex}" ${K}/><circle cx="22" cy="24" r="5" fill="#fff" opacity=".7"/></svg>`;
+const numeral = t => `<svg viewBox="0 0 64 64" aria-hidden="true"><text x="32" y="50" text-anchor="middle" font-family="'Baloo 2','Trebuchet MS',sans-serif" font-weight="800" font-size="${String(t).length > 1 ? 30 : 52}" fill="#e8418a" stroke="#3b1f4a" stroke-width="2.5" paint-order="stroke">${t}</text></svg>`;
+const palette = '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="22" cy="24" r="15" fill="#ff5fa8" ' + K + '/><circle cx="43" cy="26" r="15" fill="#3d8bff" ' + K + '/><circle cx="32" cy="43" r="15" fill="#ffc928" ' + K + '/></svg>';
+const ICON_BOOK = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 8h12q3 0 3 3v22q0-3-3-3H5z" fill="#fff" stroke="#3b1f4a" stroke-width="3" stroke-linejoin="round"/><path d="M35 8H23q-3 0-3 3v22q0-3 3-3h12z" fill="#fff" stroke="#3b1f4a" stroke-width="3" stroke-linejoin="round"/><path d="M27.500 13l1.700 3.400 3.800.600-2.700 2.700.600 3.800-3.400-1.800-3.400 1.800.600-3.800-2.700-2.700 3.800-.600z" fill="#ffc928" stroke="#3b1f4a" stroke-width="1.500" stroke-linejoin="round"/><path d="M9 15h7M9 20h7M9 25h5" stroke="#e8418a" stroke-width="2.500" stroke-linecap="round"/></svg>';
 const ICON_PLAY = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M13 7l20 13-20 13z" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round"/></svg>';
 const ICON_OK = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 21l9 9 17-19" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_AGAIN = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M32 20a12 12 0 1 1-4-9" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M30 3v10H20z" fill="#fff"/></svg>';
@@ -642,9 +697,16 @@ const ROOMS = {
       return null;
     } },
   yemek: { tr: 'Yemek', en: 'feeding', pic: 'elma', mane: 'combed', start: 'start_yemek', done: 'done_yemek', spot: 'mouthspot',
-    // five things to eat, with a drink of water in the middle
-    plan() { const s = shuffle(['elma', 'havuc', 'muz', 'karpuz', 'armut', 'uzum', 'ekmek']).slice(0, 5); s.splice(3, 0, 'su'); return s; },
-    use(t) { chomp(); if (t === 'su') return 'fx_milk'; if (t === 'elma' || t === 'havuc') return 'fx_crunch'; return ['fx_chomp', 'fx_tasty', 'fx_more'][S.worn++ % 3]; } },
+    // five things to eat, with a drink of water in the middle. Two of the five are asked for by number ("İki elma!"):
+    // one to three the first time, up to five after that.
+    plan() {
+      const s = shuffle(COUNTED.slice()).slice(0, 5), most = (S.visits.yemek || 1) <= 1 ? 3 : 5;
+      shuffle([0, 1, 2, 3, 4]).slice(0, 2).forEach(k => { s[k] += '-x' + (1 + Math.floor(Math.random() * most)); });
+      s.splice(3, 0, 'su'); return s;
+    },
+    use(t) { const c = countOf(t); if (!c) chomp(); if (t === 'su') return 'fx_milk'; if (!c && (t === 'elma' || t === 'havuc')) return 'fx_crunch'; return ['fx_chomp', 'fx_tasty', 'fx_more'][S.worn++ % 3]; },
+    // she eats them one at a time, counting out loud
+    async act(t) { const c = countOf(t); if (!c) return; await say(NUMBERS.slice(0, c.n).map(x => 'num/' + x.n), (id, i) => { chomp(); show(NUMBERS.slice(0, i + 1).map((x, k) => (k ? x.tr.toLocaleLowerCase('tr') : x.tr)).join(', ') + '!', NUMBERS.slice(0, i + 1).map(x => x.n).join(', ')); }); } },
   gezinti: { tr: 'Gezinti', en: 'riding', pic: 'kask', mane: 'combed', start: 'start_gezinti', done: 'done_gezinti',
     // the saddle (Leyla hops on), her helmet (off they trot), then four things to spot on the way
     plan() { return ['eyer', 'kask'].concat(shuffle(['agac', 'kelebek', 'kus', 'gunes', 'bulut', 'gokkusagi', 'ev', 'cicek']).slice(0, 4)); },
@@ -660,15 +722,60 @@ const ROOM_ORDER = ['kuafor', 'butik', 'havuz', 'pastane', 'yemek', 'gezinti'];
 /* =====================================================================
    The game
    ===================================================================== */
-const S = { mode: 'title', room: null, names: [], picking: [], visits: {}, steps: [], i: 0, wrong: 0, busy: false, worn: 0, last: [] };
+const S = { mode: 'title', room: null, names: [], picking: [], visits: {}, steps: [], i: 0, wrong: 0, busy: false, worn: 0, last: [], found: new Set(), fresh: 0 };
 const shelf = $('shelf');
 function show(tr, en) { $('word').textContent = tr; $('gloss').textContent = en || ''; }
 function setMode(m) { S.mode = m; document.body.dataset.mode = m; }
 function fullName() { return S.names.map(id => nameOf[id].show).join(' '); }
 function drawTag(ids) { const t = $('tag'); t.textContent = ids.map(id => nameOf[id].show).join(' '); t.hidden = !ids.length; }
 function bigButton(icon, label, onTap, small) { const b = document.createElement('button'); b.className = 'go' + (small ? ' small' : ''); b.innerHTML = icon; b.setAttribute('aria-label', label); b.onclick = onTap; return b; }
-function loadNames() { try { const v = JSON.parse(localStorage.getItem('lm-names') || '[]'); if (Array.isArray(v)) return v.filter(id => nameOf[id]).slice(0, MAX_NAMES); } catch (e) {} return []; }
+function loadNames() { try { const v = JSON.parse(localStorage.getItem('lm-names') || '[]'); if (Array.isArray(v)) return v.map(id => (id === 'zooey' ? 'zoey' : id)).filter(id => nameOf[id]).slice(0, MAX_NAMES); } catch (e) {} return []; }
 function saveNames() { try { localStorage.setItem('lm-names', JSON.stringify(S.names)); } catch (e) {} }
+
+/* ---------- The sticker book: one sticker for every word Leyla has found, kept on this tablet ---------- */
+function loadFound() { try { const v = JSON.parse(localStorage.getItem('lm-found') || '[]'); if (Array.isArray(v)) return new Set(v.filter(k => typeof k === 'string')); } catch (e) {} return new Set(); }
+function saveFound() { try { localStorage.setItem('lm-found', JSON.stringify([...S.found])); } catch (e) {} }
+// Getting a thing right earns its sticker. A colored thing also earns the color, a counted thing also earns the number.
+function mark(target) {
+  const v = variantOf(target), c = countOf(target), keys = v ? [v.base, 'renk-' + v.color.id] : c ? [c.base, 'sayi-' + c.n] : [target];
+  let fresh = 0; keys.forEach(k => { if (!S.found.has(k)) { S.found.add(k); fresh++; } });
+  if (fresh) { S.fresh += fresh; saveFound(); }
+}
+// The pages: one per room, then the colors, then the numbers. Each sticker: its key, its words, its picture, its voice clip.
+function albumPages() {
+  const pages = ROOM_ORDER.map(r => ({ key: 'room-' + r, tr: ROOMS[r].tr, en: ROOMS[r].en, pic: drawing(ROOMS[r].pic), clip: 'word/room-' + r,
+    tiles: ITEMS.filter(i => i.r === r).map(i => ({ key: i.id, tr: i.tr, en: i.en, pic: drawing(i.id), clip: 'word/' + i.id })) }));
+  pages[ROOM_ORDER.indexOf('kuafor')].tiles.push({ key: 'kurdele', tr: 'Kurdele', en: 'ribbon', pic: drawing('kurdele-pembe'), clip: 'word/kurdele' });
+  pages[ROOM_ORDER.indexOf('butik')].tiles.unshift({ key: 'elbise', tr: 'Elbise', en: 'dress', pic: drawing('elbise-pembe'), clip: 'word/elbise' });
+  pages.push({ key: 'renkler', tr: 'Renkler', en: 'colors', pic: palette, clip: 'word/renkler', tiles: COLORS.map(c => ({ key: 'renk-' + c.id, tr: c.tr, en: c.en, pic: swatch(c.hex), clip: 'word/renk-' + c.id })) });
+  pages.push({ key: 'sayilar', tr: 'Sayılar', en: 'numbers', pic: numeral('123'), clip: 'word/sayilar', tiles: NUMBERS.map(x => ({ key: 'sayi-' + x.n, tr: x.tr, en: x.en, pic: numeral(x.n), clip: 'num/' + x.n })) });
+  return pages;
+}
+const roomFull = r => { const p = albumPages().find(x => x.key === 'room-' + r); return !!p && p.tiles.every(t => S.found.has(t.key)); };
+function albumShow(tr, en) { $('albumword').textContent = tr; $('albumgloss').textContent = en || ''; }
+function openAlbum() {
+  if (S.busy) return;
+  initAudio(); stopSound(); talk++;
+  const grid = $('albumgrid'); grid.textContent = ''; let total = 0, have = 0;
+  albumPages().forEach(page => {
+    const box = document.createElement('div'); box.className = 'sec';
+    const tile = (cls, pic, label, onTap) => { const b = document.createElement('button'); b.className = 'sticker ' + cls; b.innerHTML = pic; b.setAttribute('aria-label', label); b.onclick = () => onTap(b); box.append(b); return b; };
+    tile('head', page.pic, page.tr, () => { albumShow(page.tr, page.en); say([page.clip]); }).id = 'page-' + page.key;
+    let all = true;
+    page.tiles.forEach(t => {
+      const got = S.found.has(t.key); total++; if (got) have++; else all = false;
+      tile(got ? '' : 'locked', t.pic, got ? t.tr : '?', b => {
+        if (got) { albumShow(t.tr, t.en); say([t.clip]); } else { stopSound(); b.classList.add('wobble'); setTimeout(() => b.classList.remove('wobble'), 500); }   // a sticker she has not found yet stays a mystery
+      }).id = 'st-' + t.key;
+    });
+    box.classList.toggle('full', all); grid.append(box);
+  });
+  $('albumcount').textContent = '⭐ ' + have + ' / ' + total;
+  $('album').hidden = false; $('album').scrollTop = 0;
+  const line = have === total ? 'allfound' : 'album'; albumShow(LINES[line][0], LINES[line][1]); say(['line/' + line]);
+  if (have === total) confetti();
+}
+function closeAlbum() { stopSound(); talk++; $('album').hidden = true; }
 
 function showTitle() {
   setMode('title'); S.busy = false; setRoom(null); resetPony('combed'); $('steps').textContent = ''; drawTag(S.names);
@@ -713,8 +820,10 @@ function showRooms(hello) {
   ROOM_ORDER.forEach(id => {
     const b = document.createElement('button'); b.className = 'pick'; b.id = 'room-' + id; b.innerHTML = drawing(ROOMS[id].pic); b.setAttribute('aria-label', ROOMS[id].tr);
     b.onclick = async () => { if (S.busy) return; initAudio(); S.busy = true; b.classList.add('right'); show(ROOMS[id].tr, ROOMS[id].en); hop(); await say(['word/room-' + id]); startVisit(id); };
+    if (roomFull(id)) b.classList.add('star');                       // every sticker of this room found
     shelf.append(b);
   });
+  const book = bigButton(ICON_BOOK, 'Çıkartma defteri', openAlbum, true); book.id = 'book'; shelf.append(book);
   show(LINES.where[0], LINES.where[1]);
   say(hello ? ['line/hello', 'line/where'] : ['line/where'], showLineFor);
 }
@@ -722,8 +831,10 @@ function showRooms(hello) {
 // How many pictures to choose from: two at the very start of a room, then three, and four once she has been there a few times.
 function choicesFor(target) {
   const visit = S.visits[S.room] || 1, n = visit <= 1 ? (S.i < 3 ? 2 : 3) : visit >= 4 ? 4 : 3;
-  const v = variantOf(target);
-  const pool = v ? COLORS.map(c => v.base + '-' + c.id).filter(x => x !== target)
+  const v = variantOf(target), c = countOf(target);
+  // a colored thing is shown among its other colors, a counted thing among other amounts of itself, anything else among other things from the room
+  const pool = v ? COLORS.map(k => v.base + '-' + k.id).filter(x => x !== target)
+             : c ? [1, 2, 3, 4, 5].filter(k => k !== c.n).map(k => c.base + '-x' + k)
                  : ITEMS.filter(i => i.r === S.room).map(i => i.id).concat(BORROWED[S.room] || []).filter(x => x !== target && x !== TWIN[target]);
   return shuffle([target].concat(shuffle(pool).slice(0, n - 1)));
 }
@@ -731,7 +842,7 @@ function drawSteps() { const el = $('steps'); el.textContent = ''; S.steps.forEa
 
 async function startVisit(room) {
   const R = ROOMS[room];
-  setMode('visit'); S.busy = true; S.room = room; S.visits[room] = (S.visits[room] || 0) + 1; S.steps = R.plan(); S.i = 0; S.worn = 0;
+  setMode('visit'); S.busy = true; S.room = room; S.visits[room] = (S.visits[room] || 0) + 1; S.steps = R.plan(); S.i = 0; S.worn = 0; S.fresh = 0;
   setRoom(room); resetPony(R.mane); drawTag(S.names); drawSteps(); shelf.textContent = '';
   await sayLine(R.start);
   nextStep();
@@ -762,7 +873,9 @@ async function choose(btn, id) {
   const spoken = say(['word/' + id]);
   await fly(btn, R.spot || 'headspot'); btn.style.visibility = 'hidden';
   const reaction = R.use(target, inf);
+  mark(target);
   hop(); await spoken;
+  if (R.act) await R.act(target);
   S.i++; drawSteps();
   if (S.i >= S.steps.length) { finale(); return; }                   // the last thing leads straight into the ending
   if (reaction) await sayLine(reaction);
@@ -777,8 +890,11 @@ async function finale() {
   show(fullName() + '!', '');
   await say(S.names.map(id => 'name/' + id), () => hop());
   hop('twirl'); confetti();
+  const fresh = S.fresh > 0;
+  if (fresh) await sayLine('newsticker');
   shelf.append(bigButton(ICON_AGAIN, 'Tekrar oyna', () => { initAudio(); startVisit(S.room); }));
   const door = bigButton(ICON_DOOR, 'Başka oda', () => { initAudio(); showRooms(false); }, true); door.id = 'door'; shelf.append(door);
+  const book = bigButton(ICON_BOOK, 'Çıkartma defteri', openAlbum, true); book.id = 'book'; if (fresh) book.classList.add('pulse'); shelf.append(book);
   S.busy = false; sayLine('again');
 }
 
@@ -796,8 +912,10 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) stopS
 // The pool runs on past the edge of the picture, so on a wide tablet the water reaches the side of the screen.
 $('water').setAttribute('d', 'M122 268 q14 -10 28 0' + ' t28 0'.repeat(70) + ' V900 H122 Z');
 
-S.names = loadNames();
+$('albumclose').onclick = closeAlbum;
+
+S.names = loadNames(); S.found = loadFound();
 showTitle();
-window.__lm = { S, ROOMS, ROOM_ORDER, choose, startVisit, startNaming, showTitle, showRooms, finale, info, drawing, variantOf, ITEMS, COLORS, NAMES, LINES, VARIANT };   // handle for testing
+window.__lm = { S, ROOMS, ROOM_ORDER, choose, startVisit, startNaming, showTitle, showRooms, finale, info, drawing, variantOf, countOf, albumPages, openAlbum, closeAlbum, mark, ITEMS, COLORS, NAMES, LINES, VARIANT, NUMBERS, COUNTED };   // handle for testing
 })();
 </script>

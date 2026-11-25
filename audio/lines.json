@@ -403,9 +403,9 @@
   ],
   "names": [
     {
-      "id": "zooey",
-      "show": "Zooey",
-      "tts": "Zui"
+      "id": "zoey",
+      "show": "Zoey",
+      "tts": "Zoi"
     },
     {
       "id": "rosie",
@@ -809,6 +809,24 @@
       "text": "Çüş! Geldik! Çok güzel bir gezinti oldu, Leyla!",
       "tts": "[excited] Çüş! Geldik! Çok güzel bir gezinti oldu, Leyla!",
       "en": "Whoa! We are here! What a lovely ride, Leyla!"
+    },
+    {
+      "id": "album",
+      "text": "İşte çıkartma defterimiz!",
+      "tts": "[excited] İşte çıkartma defterimiz!",
+      "en": "Here is our sticker book!"
+    },
+    {
+      "id": "newsticker",
+      "text": "Yeni çıkartma kazandın!",
+      "tts": "[excited] Yeni çıkartma kazandın!",
+      "en": "You won a new sticker!"
+    },
+    {
+      "id": "allfound",
+      "text": "Hepsini buldun! Harikasın!",
+      "tts": "[excited] Hepsini buldun! Harikasın!",
+      "en": "You found them all! You are wonderful!"
     }
   ],
   "variants": [
@@ -855,6 +873,56 @@
       "id": "gezinti",
       "tr": "Gezinti",
       "en": "riding"
+    }
+  ],
+  "counted": {
+    "items": [
+      "elma",
+      "havuc",
+      "muz",
+      "karpuz",
+      "armut",
+      "uzum",
+      "ekmek"
+    ],
+    "numbers": [
+      {
+        "n": 1,
+        "tr": "Bir",
+        "en": "one"
+      },
+      {
+        "n": 2,
+        "tr": "İki",
+        "en": "two"
+      },
+      {
+        "n": 3,
+        "tr": "Üç",
+        "en": "three"
+      },
+      {
+        "n": 4,
+        "tr": "Dört",
+        "en": "four"
+      },
+      {
+        "n": 5,
+        "tr": "Beş",
+        "en": "five"
+      }
+    ]
+  },
+  "extraWords": [
+    {
+      "id": "renkler",
+      "tr": "Renkler",
+      "en": "colors"
+    },
+    {
+      "id": "sayilar",
+      "tr": "Sayılar",
+      "en": "numbers"
     }
   ]
 }
