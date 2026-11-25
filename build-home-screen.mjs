@@ -38,7 +38,8 @@ function splitArtifact(source) {
 
 function readTokens(style) {
   const tokens = {};
-  for (const m of style.matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{6})\s*;/g)) tokens[m[1]] = m[2].toLowerCase();
+  // The first definition wins: later ones are the per-room wall and floor colors.
+  for (const m of style.matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{6})\s*[;}]/g)) if (!tokens[m[1]]) tokens[m[1]] = m[2].toLowerCase();
   for (const name of ['wall', 'floor', 'ink', 'berry', 'coat', 'hair', 'sun']) {
     if (!tokens[name]) throw new Error(`The color token --${name} is missing from index.html :root. The icons and theme color are drawn from it; add it back or update the build.`);
   }

@@ -18,11 +18,12 @@ for (const it of cfg.items) {
   clips.push({ id: 'word/' + it.id, voice: 'word', tts: it.tr + '.' });
   clips.push({ id: 'ask/' + it.id, voice: 'pony', tts: `[excited] ${it.tr}! ${it.tr} nerede?` });
 }
-for (const c of cfg.colors) {
-  const phrase = `${c.tr} ${cfg.ribbon.tr}`;
-  clips.push({ id: 'word/kurdele-' + c.id, voice: 'word', tts: phrase + '.' });
-  clips.push({ id: 'ask/kurdele-' + c.id, voice: 'pony', tts: `[excited] ${phrase}! ${phrase} nerede?` });
+for (const v of cfg.variants) for (const c of cfg.colors) {
+  const phrase = `${c.tr} ${v.tr}`;
+  clips.push({ id: `word/${v.id}-${c.id}`, voice: 'word', tts: phrase + '.' });
+  clips.push({ id: `ask/${v.id}-${c.id}`, voice: 'pony', tts: `[excited] ${phrase}! ${phrase} nerede?` });
 }
+for (const r of cfg.rooms) clips.push({ id: 'word/room-' + r.id, voice: 'word', tts: r.tr + '.' });
 for (const n of cfg.names) clips.push({ id: 'name/' + n.id, voice: 'pony', tts: `[excited] ${n.tts}!` });
 for (const l of cfg.lines) clips.push({ id: 'line/' + l.id, voice: 'pony', tts: l.tts });
 

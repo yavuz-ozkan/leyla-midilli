@@ -71,7 +71,7 @@
 }
 </style>
 <style>
-/* Layout: one screen, three bands. The pony's speech bubble on top, the pony in her salon in the middle,
+/* Layout: one screen, three bands. The pony's speech bubble on top, the pony in her room in the middle,
    a shelf of big things to tap at the bottom. Nothing to read: every tap speaks Turkish. */
 :root{
   --wall:#f4e6ff; --wall-2:#ead4fb; --floor:#ffd3e6; --paper:#fffaf3; --ink:#3b1f4a; --soft:#8a6f96;
@@ -80,6 +80,13 @@
   --font-small:'Nunito','Segoe UI',sans-serif;
   color-scheme:light;
 }
+/* each room has its own walls and floor */
+body[data-room="butik"]{--wall:#ffeadd;--wall-2:#ffdccb;--floor:#e6d5ff}
+body[data-room="havuz"]{--wall:#dff4ff;--wall-2:#c8eaff;--floor:#ffe7b3}
+body[data-room="pastane"]{--wall:#e6f8ee;--wall-2:#d2f0df;--floor:#ffe0cf}
+body[data-room="yemek"]{--wall:#fff3d6;--wall-2:#ffe8bd;--floor:#d9efc2}
+body[data-room="gezinti"]{--wall:#dff4ff;--wall-2:#cfecff;--floor:#bfe8a6}   /* outdoors: sky and grass */
+body.ride #app{animation:roll 1.1s linear infinite}                           /* the world rolls past while she trots */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--wall);color:var(--ink);font-family:var(--font);font-size:16px;overflow:hidden;
@@ -106,7 +113,7 @@ button:focus-visible{outline:4px solid var(--berry);outline-offset:3px}
 #steps i.done{background:var(--berry)}
 #steps i.now{background:var(--sun)}
 
-/* the salon */
+/* the room */
 #stage{position:relative;min-height:0;overflow:hidden}
 #pony{position:absolute;inset:0;width:100%;height:100%;display:block}   /* fills the middle band and never spills onto the shelf */
 #tag{position:absolute;left:0;top:0;max-width:60%;background:var(--berry);color:#fff;font-weight:800;font-size:clamp(.95rem,2.6vw,1.3rem);
@@ -125,16 +132,32 @@ button:focus-visible{outline:4px solid var(--berry);outline-offset:3px}
 .line{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
 .acc{stroke:var(--ink);stroke-width:3.5;stroke-linejoin:round}
 .off{display:none}
-#pony [data-m]{display:none}
+/* what shows for each state of her mane, and for each room */
+#pony [data-m],#pony [data-r]{display:none}
 #pony[data-mane="messy"] [data-m~="messy"],#pony[data-mane="wet"] [data-m~="wet"],#pony[data-mane="soapy"] [data-m~="soapy"],
-#pony[data-mane="combed"] [data-m~="combed"],#pony[data-mane="fluffy"] [data-m~="fluffy"]{display:inline}
-#bounce,#eye,#suds circle,#fx *{transform-box:fill-box;transform-origin:center}
+#pony[data-mane="combed"] [data-m~="combed"],#pony[data-mane="fluffy"] [data-m~="fluffy"],
+#pony[data-room="havuz"] [data-r~="havuz"],#pony[data-room="pastane"] [data-r~="pastane"]{display:inline}
+#pony .front-water{display:none}
+#pony.swim .front-water{display:inline}
+#pony.swim #shadow{display:none}
+/* where she stands: the middle, or to the left when there is a pool or a table beside her, or in the water */
+#ponywrap{transform:translate(70px,0);transition:transform .7s cubic-bezier(.3,.7,.3,1)}
+#pony[data-room="havuz"] #ponywrap,#pony[data-room="pastane"] #ponywrap{transform:translate(0,0)}
+#pony[data-room="havuz"].swim #ponywrap{transform:translate(110px,72px)}
+#bounce,#eye,#suds circle,#fx *,#fx2 *,#bowl,#flame,#chomp,.bobber{transform-box:fill-box;transform-origin:center}
 #bounce{animation:bob 2.6s ease-in-out infinite}
+#pony.ride #bounce{animation:bob .34s ease-in-out infinite}
+#chomp{display:none}
+#pony.chomp #smile{display:none}
+#pony.chomp #chomp{display:inline;animation:munch .22s ease-in-out 5 alternate}
 #bounce.jump{animation:jump .5s ease-out}
 #bounce.twirl{animation:twirl 1.1s ease-in-out}
 #eye{animation:blink 4.2s infinite}
 #suds circle{animation:sud 1.6s ease-in-out infinite alternate}
 #suds circle:nth-child(2n){animation-delay:-.7s}
+#bowl.stir{animation:wobble .3s 3}
+#flame{animation:flame .5s ease-in-out infinite alternate}
+.bobber{animation:bob 1.8s ease-in-out infinite}
 .fx-bub{animation:floatup 1.5s ease-out forwards}
 .fx-drop{animation:fall .9s ease-in forwards}
 .fx-spark{animation:pop .9s ease-out forwards}
@@ -153,6 +176,7 @@ button:focus-visible{outline:4px solid var(--berry);outline-offset:3px}
 .pick:disabled{cursor:default}
 .go{width:clamp(96px,22vmin,150px);aspect-ratio:1;border-radius:50%;background:var(--berry);border:5px solid var(--ink);box-shadow:0 7px 0 var(--ink);display:grid;place-items:center}
 .go svg{width:52%;height:52%}
+.go.small{width:clamp(72px,16vmin,110px);background:var(--mint)}
 .go:active{transform:translateY(5px);box-shadow:0 2px 0 var(--ink)}
 .go:disabled{background:#d9cbe0;box-shadow:0 3px 0 var(--ink);cursor:default}
 .chip{display:flex;align-items:center;gap:6px;background:#fff;border:4px solid var(--ink);border-radius:999px;padding:4px 16px 4px 10px;box-shadow:0 5px 0 var(--ink);
@@ -167,6 +191,9 @@ button:focus-visible{outline:4px solid var(--berry);outline-offset:3px}
 @keyframes twirl{0%,100%{transform:scaleX(1)}25%{transform:scaleX(-1) translateY(-22px)}50%{transform:scaleX(1)}75%{transform:scaleX(-1) translateY(-22px)}}
 @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
 @keyframes sud{from{transform:translateY(0) scale(1)}to{transform:translateY(-5px) scale(1.12)}}
+@keyframes flame{from{transform:scale(1,1)}to{transform:scale(.85,1.15)}}
+@keyframes munch{from{transform:scaleY(1)}to{transform:scaleY(.25)}}
+@keyframes roll{to{background-position:0 0,-88px 0}}
 @keyframes floatup{from{transform:translateY(0) scale(.5);opacity:1}to{transform:translateY(-110px) scale(1.2);opacity:0}}
 @keyframes fall{from{transform:translateY(-40px);opacity:1}to{transform:translateY(130px);opacity:0}}
 @keyframes pop{0%{transform:scale(0) rotate(0);opacity:1}60%{transform:scale(1.2) rotate(40deg);opacity:1}100%{transform:scale(.6) rotate(70deg);opacity:0}}
@@ -174,7 +201,7 @@ button:focus-visible{outline:4px solid var(--berry);outline-offset:3px}
 @keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}75%{transform:rotate(9deg)}}
 @keyframes hint{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 @keyframes confetti{to{transform:translateY(110vh) rotate(540deg)}}
-@media (prefers-reduced-motion:reduce){#bounce,#eye,#suds circle,.pick.hint{animation:none}}
+@media (prefers-reduced-motion:reduce){#bounce,#pony.ride #bounce,body.ride #app,#eye,#suds circle,.pick.hint,#flame,.bobber{animation:none}#ponywrap{transition:none}}
 </style>
 <style>
 /* Home screen build only: outside the artifact host nothing pads for the status bar and home indicator, so do it here. */
@@ -195,7 +222,7 @@ html.home-screen body { margin: 0; padding-top: env(safe-area-inset-top, 0px); p
   </div>
 
   <div id="stage">
-    <svg id="pony" viewBox="0 0 420 380" data-mane="combed" role="img" aria-label="Midilli">
+    <svg id="pony" viewBox="0 0 560 380" data-mane="combed" role="img" aria-label="Midilli">
       <defs>
         <g id="bodyshape">
           <rect x="104" y="262" width="28" height="86" rx="13"/><rect x="250" y="262" width="28" height="86" rx="13"/>
@@ -206,60 +233,144 @@ html.home-screen body { margin: 0; padding-top: env(safe-area-inset-top, 0px); p
           <ellipse cx="306" cy="114" rx="50" ry="43"/><ellipse cx="346" cy="134" rx="31" ry="25"/>
           <path d="M283 84 L290 38 L316 76 Z"/>
         </g>
+        <path id="water" d="M122 268 q14 -10 28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 V380 H122 Z"/>
       </defs>
-      <ellipse cx="190" cy="352" rx="132" ry="13" fill="#3b1f4a" opacity=".16"/>
-      <g id="bounce">
-        <path class="hair" data-m="messy wet soapy" d="M98 206 L54 196 L72 214 L30 222 L60 238 L24 264 L58 266 L34 302 L70 286 L74 314 L92 270 Q106 246 104 224 Z"/>
-        <path class="hair" data-m="combed fluffy" d="M100 204 C40 194 20 252 44 320 C72 314 86 284 90 262 C100 248 108 236 106 222 Z"/>
-        <g class="far"><rect x="136" y="258" width="26" height="88" rx="12"/><rect x="220" y="258" width="26" height="88" rx="12"/></g>
-        <use href="#bodyshape" class="ol"/><use href="#bodyshape" class="fl"/>
-        <rect class="hoof" x="104" y="332" width="28" height="17" rx="7"/><rect class="hoof" x="250" y="332" width="28" height="17" rx="7"/>
 
-        <path class="hair" data-m="messy" d="M290 70 L262 54 L270 80 L238 72 L254 98 L222 100 L240 122 L208 130 L230 146 L198 162 L224 168 L204 194 L238 194 Q248 140 292 100 Z"/>
-        <path class="hair wet" data-m="wet soapy" d="M292 68 C254 74 224 124 216 202 C228 214 242 204 244 188 C252 142 268 114 292 98 Z"/>
-        <g data-m="combed">
-          <path class="hair" d="M292 66 C250 64 216 112 206 190 C220 204 236 198 240 186 C248 142 266 114 292 98 Z"/>
-          <path class="strand" d="M268 84 C246 104 232 138 226 176"/><path class="strand" d="M280 76 C262 92 248 112 240 136"/>
-        </g>
-        <g data-m="fluffy">
-          <circle class="hair" cx="220" cy="172" r="23"/><circle class="hair" cx="230" cy="142" r="25"/><circle class="hair" cx="244" cy="114" r="25"/>
-          <circle class="hair" cx="262" cy="90" r="24"/><circle class="hair" cx="284" cy="72" r="22"/>
-        </g>
-        <g id="suds" data-m="soapy">
-          <circle class="sud" cx="232" cy="150" r="13"/><circle class="sud" cx="250" cy="118" r="16"/><circle class="sud" cx="270" cy="92" r="12"/>
-          <circle class="sud" cx="222" cy="180" r="10"/><circle class="sud" cx="246" cy="146" r="8"/><circle class="sud" cx="288" cy="74" r="10"/>
-        </g>
-
-        <use href="#headshape" class="ol"/><use href="#headshape" class="fl"/>
-        <path d="M290 76 L293 52 L308 74 Z" fill="#ffb3d1"/>
-        <circle cx="300" cy="140" r="11" fill="#ff9ec4" opacity=".55"/>
-        <g id="eye"><ellipse cx="322" cy="108" rx="10" ry="12" fill="#3b1f4a"/><circle cx="326" cy="103" r="4" fill="#fff"/><circle cx="319" cy="113" r="2" fill="#fff"/></g>
-        <path class="line" d="M309 96 l-6 -5M314 92 l-3 -7" stroke-width="3"/>
-        <ellipse cx="360" cy="128" rx="3" ry="4.5" fill="#3b1f4a"/>
-        <path class="line" d="M338 146 q11 9 24 2"/>
-
-        <path class="hair" data-m="messy" d="M292 78 L300 52 L309 74 L322 50 L325 78 L344 66 L337 98 C325 89 310 86 298 93 Z"/>
-        <path class="hair" data-m="combed fluffy" d="M291 76 C306 58 334 68 339 98 C327 90 312 86 298 93 Z"/>
-        <path class="hair wet" data-m="wet soapy" d="M291 78 C306 66 330 74 336 104 C326 94 312 88 298 94 Z"/>
-
-        <g id="acc-bow" class="off" style="fill:var(--bow,#ff5fa8)">
-          <path class="acc" d="M258 90 L230 72 Q222 90 230 108 Z"/><path class="acc" d="M258 90 L286 72 Q294 90 286 108 Z"/>
-          <path class="acc" d="M254 94 L246 120 L257 112 L261 98 Z"/><circle class="acc" cx="258" cy="90" r="9"/>
-        </g>
-        <g id="acc-cicek" class="off">
-          <g fill="#ff8fc7"><circle class="acc" cx="278" cy="50" r="9"/><circle class="acc" cx="291" cy="59" r="9"/><circle class="acc" cx="286" cy="74" r="9"/><circle class="acc" cx="270" cy="74" r="9"/><circle class="acc" cx="265" cy="59" r="9"/></g>
-          <circle class="acc" cx="278" cy="63" r="8" fill="#ffc928"/>
-        </g>
-        <g id="acc-tac" class="off" transform="rotate(12 314 60)">
-          <path class="acc" d="M290 74 L286 42 L301 58 L314 34 L327 58 L342 42 L338 74 Z" fill="#ffc928"/>
-          <circle cx="314" cy="62" r="5" fill="#ef3b4d"/><circle cx="299" cy="65" r="3.5" fill="#3d8bff"/><circle cx="329" cy="65" r="3.5" fill="#2fb86b"/>
-        </g>
-        <g id="acc-toka" class="off">
-          <path class="acc" d="M330 62 l5.5 11 12 1.8 -8.7 8.5 2 12 -10.8 -5.7 -10.8 5.7 2 -12 -8.7 -8.5 12 -1.8z" fill="#7fd8c3"/>
-        </g>
-        <rect id="headspot" x="240" y="56" width="90" height="90" fill="none"/>
+      <!-- the pool, behind her -->
+      <g data-r="havuz">
+        <use href="#water" fill="#6ec8ff"/>
+        <rect x="112" y="258" width="14" height="122" rx="5" fill="#fff" stroke="#3b1f4a" stroke-width="3.5"/>
       </g>
-      <g id="fx"></g>
+      <!-- the bakery table, with whatever is on it -->
+      <g data-r="pastane">
+        <rect class="acc" x="398" y="282" width="13" height="72" rx="5" fill="#b9814a"/><rect class="acc" x="532" y="282" width="13" height="72" rx="5" fill="#b9814a"/>
+        <rect class="acc" x="386" y="268" width="170" height="16" rx="7" fill="#d9a066"/>
+        <g class="wear off" data-w="kase" id="bowl">
+          <path class="acc" d="M424 226 H520 Q518 268 472 268 Q426 268 424 226 Z" fill="#7fd8c3"/>
+          <ellipse class="acc" cx="472" cy="226" rx="48" ry="9" style="fill:var(--batter,#fffaf3)"/>
+        </g>
+        <g class="wear off" data-w="pasta">
+          <ellipse class="acc" cx="472" cy="266" rx="70" ry="9" fill="#fff"/>
+          <rect class="acc" x="426" y="204" width="92" height="60" rx="10" fill="#f2c27b"/>
+          <path d="M428 236 H516" stroke="#e3a455" stroke-width="5"/>
+        </g>
+        <g class="wear off" data-w="mum">
+          <rect class="acc" x="467" y="140" width="10" height="56" rx="3" fill="#ff8fc7"/><path d="M467 156l10-5M467 170l10-5" stroke="#fff" stroke-width="3"/>
+          <path id="flame" class="acc" d="M472 114 q10 12 0 24 q-10 -12 0 -24z" fill="#ffb703"/>
+        </g>
+        <g class="wear off" data-w="krema"><path class="acc" d="M422 216 Q424 194 472 194 Q520 194 522 216 Q514 232 502 218 Q492 236 478 218 Q466 236 452 218 Q440 234 422 216 Z" fill="#fff7fb"/></g>
+        <g class="wear off" data-w="cikolata"><path d="M434 206 q8 14 16 0 t16 0 t16 0 t16 0 t16 0" fill="none" stroke="#7b4a2a" stroke-width="6" stroke-linecap="round"/></g>
+        <g class="wear off" data-w="cilek">
+          <path class="acc" d="M446 200 q-13 -10 -9 -21 q9 -5 18 0 q4 11 -9 21z" fill="#ef3b4d"/><path d="M439 180l7-6 7 6-7 3z" fill="#2fb86b"/>
+          <path class="acc" d="M472 198 q-13 -10 -9 -21 q9 -5 18 0 q4 11 -9 21z" fill="#ef3b4d"/><path d="M465 178l7-6 7 6-7 3z" fill="#2fb86b"/>
+          <path class="acc" d="M498 200 q-13 -10 -9 -21 q9 -5 18 0 q4 11 -9 21z" fill="#ef3b4d"/><path d="M491 180l7-6 7 6-7 3z" fill="#2fb86b"/>
+        </g>
+        <rect id="bowlspot" x="432" y="186" width="80" height="76" fill="none"/>
+      </g>
+
+      <!-- what they pass on a ride: the game adds each thing here as Leyla finds it -->
+      <g id="sights"></g>
+
+      <g id="ponywrap">
+        <ellipse id="shadow" cx="190" cy="352" rx="132" ry="13" fill="#3b1f4a" opacity=".16"/>
+        <g id="bounce">
+          <path class="hair" data-m="messy wet soapy" d="M98 206 L54 196 L72 214 L30 222 L60 238 L24 264 L58 266 L34 302 L70 286 L74 314 L92 270 Q106 246 104 224 Z"/>
+          <path class="hair" data-m="combed fluffy" d="M100 204 C40 194 20 252 44 320 C72 314 86 284 90 262 C100 248 108 236 106 222 Z"/>
+          <g class="far"><rect x="136" y="258" width="26" height="88" rx="12"/><rect x="220" y="258" width="26" height="88" rx="12"/></g>
+          <g class="wear off" data-w="corap"><rect class="acc" x="136" y="292" width="26" height="36" fill="#62bfa9"/><rect class="acc" x="220" y="292" width="26" height="36" fill="#62bfa9"/></g>
+          <g class="wear off" data-w="ayakkabi"><rect class="acc" x="131" y="324" width="36" height="24" rx="10" fill="#c92f3f"/><rect class="acc" x="215" y="324" width="36" height="24" rx="10" fill="#c92f3f"/></g>
+          <g class="wear off" data-w="terlik"><rect class="acc" x="130" y="340" width="38" height="9" rx="4" fill="#e0559a"/><rect class="acc" x="214" y="340" width="38" height="9" rx="4" fill="#e0559a"/></g>
+          <g class="wear off" data-w="kolluk"><rect class="acc" x="214" y="264" width="38" height="26" rx="12" fill="#e6753f"/></g>
+
+          <use href="#bodyshape" class="ol"/><use href="#bodyshape" class="fl"/>
+          <rect class="hoof" x="104" y="332" width="28" height="17" rx="7"/><rect class="hoof" x="250" y="332" width="28" height="17" rx="7"/>
+
+          <g class="wear off" data-w="corap"><rect class="acc" x="104" y="294" width="28" height="38" fill="#7fd8c3"/><rect class="acc" x="250" y="294" width="28" height="38" fill="#7fd8c3"/><path d="M106 306h24M106 318h24M252 306h24M252 318h24" stroke="#fff" stroke-width="5"/></g>
+          <g class="wear off" data-w="ayakkabi"><rect class="acc" x="98" y="326" width="42" height="24" rx="10" fill="#ef3b4d"/><rect class="acc" x="244" y="326" width="42" height="24" rx="10" fill="#ef3b4d"/><circle cx="130" cy="334" r="4" fill="#fff"/><circle cx="276" cy="334" r="4" fill="#fff"/></g>
+          <g class="wear off" data-w="terlik"><rect class="acc" x="96" y="342" width="46" height="9" rx="4" fill="#ff6fae"/><rect class="acc" x="242" y="342" width="46" height="9" rx="4" fill="#ff6fae"/><path d="M106 332l16 10M252 332l16 10" fill="none" stroke="#ff6fae" stroke-width="5" stroke-linecap="round"/></g>
+          <g class="wear off" data-w="kolluk"><rect class="acc" x="242" y="266" width="44" height="28" rx="13" fill="#ff8a5c"/><path d="M256 268v24M272 268v24" stroke="#fff" stroke-width="4"/></g>
+          <g class="wear off" data-w="mayo"><path class="acc" d="M116 202 C140 166 236 164 264 200 L272 250 Q188 300 104 250 Z" fill="#39c6b5"/><g fill="#fff"><circle cx="150" cy="214" r="6"/><circle cx="190" cy="200" r="6"/><circle cx="230" cy="214" r="6"/><circle cx="168" cy="246" r="6"/><circle cx="212" cy="246" r="6"/></g></g>
+          <g class="wear off" data-w="etek"><path class="acc" d="M98 236 C120 212 176 210 200 232 L212 286 Q200 302 188 288 Q176 304 162 288 Q150 304 136 288 Q124 304 110 288 Q96 298 88 284 Z" fill="#ff8fc7"/><path class="acc" d="M98 236 C120 214 176 212 200 232 L198 246 C172 228 122 230 100 250 Z" fill="#e8418a"/></g>
+          <g class="wear off" data-w="elbise" style="fill:var(--dress,#ff5fa8)"><path class="acc" d="M108 210 C130 160 240 158 266 202 L284 262 Q290 298 272 308 Q260 290 248 308 Q234 290 220 308 Q206 290 192 308 Q178 290 164 308 Q150 290 136 308 Q122 290 108 308 Q88 298 94 262 Z"/><path d="M120 228 C152 196 226 194 256 226" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".8"/></g>
+          <g class="wear off" data-w="simit"><ellipse cx="188" cy="240" rx="108" ry="30" fill="none" stroke="#3b1f4a" stroke-width="34"/><ellipse cx="188" cy="240" rx="108" ry="30" fill="none" stroke="#fff" stroke-width="27"/><ellipse cx="188" cy="240" rx="108" ry="30" fill="none" stroke="#ef3b4d" stroke-width="27" stroke-dasharray="46 46"/></g>
+          <g class="wear off" data-w="canta"><path d="M150 236 Q170 150 192 236" fill="none" stroke="#3b1f4a" stroke-width="9" stroke-linecap="round"/><path d="M150 236 Q170 150 192 236" fill="none" stroke="#ffd166" stroke-width="4" stroke-linecap="round"/><rect class="acc" x="144" y="230" width="54" height="40" rx="10" fill="#9b5de5"/><circle class="acc" cx="171" cy="246" r="6" fill="#ffd166"/></g>
+          <!-- for a ride: the saddle, then Leyla herself, then her helmet -->
+          <g class="wear off" data-w="eyer"><path class="acc" d="M146 176 Q188 150 232 178 L224 204 Q188 190 154 204 Z" fill="#b9814a"/><path d="M188 196 V236" stroke="#3b1f4a" stroke-width="4"/><rect x="178" y="234" width="20" height="14" rx="5" fill="none" stroke="#9aa5b1" stroke-width="5"/></g>
+          <g class="wear off" data-w="binici">
+            <path d="M340 150 Q280 196 214 164" fill="none" stroke="#7b4a2a" stroke-width="3.5" stroke-linecap="round"/>
+            <rect class="acc" x="176" y="170" width="18" height="62" rx="9" fill="#5b8def"/><rect class="acc" x="172" y="222" width="28" height="16" rx="7" fill="#7b4a2a"/>
+            <path class="acc" d="M164 180 Q162 128 188 126 Q212 128 210 180 Z" fill="#9b5de5"/>
+            <path class="acc" d="M198 146 L226 162 L220 172 L194 160 Z" fill="#9b5de5"/><circle class="acc" cx="222" cy="168" r="6" fill="#f2c9a0"/>
+            <circle class="acc" cx="160" cy="106" r="10" fill="#5a3418"/>
+            <circle class="acc" cx="188" cy="102" r="22" fill="#f2c9a0"/>
+            <path class="acc" d="M166 100 Q168 76 190 78 Q212 80 210 102 Q196 88 166 100 Z" fill="#5a3418"/>
+            <circle cx="197" cy="104" r="3" fill="#3b1f4a"/><path d="M192 113 q6 4 11 -1" fill="none" stroke="#3b1f4a" stroke-width="2.5" stroke-linecap="round"/><circle cx="186" cy="112" r="4" fill="#ff9ec4" opacity=".6"/>
+          </g>
+          <g class="wear off" data-w="kask"><path class="acc" d="M164 98 Q164 70 188 70 Q214 70 214 98 Z" fill="#ff6fae"/><path class="acc" d="M162 96 H212 Q222 96 226 104 H162 Z" fill="#e8418a"/></g>
+
+          <path class="hair" data-m="messy" d="M290 70 L262 54 L270 80 L238 72 L254 98 L222 100 L240 122 L208 130 L230 146 L198 162 L224 168 L204 194 L238 194 Q248 140 292 100 Z"/>
+          <path class="hair wet" data-m="wet soapy" d="M292 68 C254 74 224 124 216 202 C228 214 242 204 244 188 C252 142 268 114 292 98 Z"/>
+          <g data-m="combed">
+            <path class="hair" d="M292 66 C250 64 216 112 206 190 C220 204 236 198 240 186 C248 142 266 114 292 98 Z"/>
+            <path class="strand" d="M268 84 C246 104 232 138 226 176"/><path class="strand" d="M280 76 C262 92 248 112 240 136"/>
+          </g>
+          <g data-m="fluffy">
+            <circle class="hair" cx="220" cy="172" r="23"/><circle class="hair" cx="230" cy="142" r="25"/><circle class="hair" cx="244" cy="114" r="25"/>
+            <circle class="hair" cx="262" cy="90" r="24"/><circle class="hair" cx="284" cy="72" r="22"/>
+          </g>
+          <g id="suds" data-m="soapy">
+            <circle class="sud" cx="232" cy="150" r="13"/><circle class="sud" cx="250" cy="118" r="16"/><circle class="sud" cx="270" cy="92" r="12"/>
+            <circle class="sud" cx="222" cy="180" r="10"/><circle class="sud" cx="246" cy="146" r="8"/><circle class="sud" cx="288" cy="74" r="10"/>
+          </g>
+          <g class="wear off" data-w="kolye"><path d="M252 160 Q282 196 316 172" fill="none" stroke="#9b5de5" stroke-width="3"/><g fill="#ff8fc7"><circle class="acc" cx="258" cy="167" r="6"/><circle class="acc" cx="270" cy="177" r="6"/><circle class="acc" cx="298" cy="181" r="6"/><circle class="acc" cx="310" cy="175" r="6"/></g><path class="acc" d="M284 202 q-14 -11 -8 -19 q5 -4 8 2 q3 -6 8 -2 q6 8 -8 19z" fill="#ef3b4d"/></g>
+          <g class="wear off" data-w="atki"><path class="acc" d="M248 148 Q282 188 322 162 L326 182 Q282 212 240 170 Z" fill="#3d8bff"/><path class="acc" d="M296 190 L310 244 L288 248 L280 196 Z" fill="#3d8bff"/><path d="M262 172l6 -14M282 186l2 -16M302 182l-4 -14M290 232l18 -4" stroke="#fff" stroke-width="4" stroke-linecap="round"/></g>
+
+          <use href="#headshape" class="ol"/><use href="#headshape" class="fl"/>
+          <path d="M290 76 L293 52 L308 74 Z" fill="#ffb3d1"/>
+          <circle cx="300" cy="140" r="11" fill="#ff9ec4" opacity=".55"/>
+          <g id="eye"><ellipse cx="322" cy="108" rx="10" ry="12" fill="#3b1f4a"/><circle cx="326" cy="103" r="4" fill="#fff"/><circle cx="319" cy="113" r="2" fill="#fff"/></g>
+          <path class="line" d="M309 96 l-6 -5M314 92 l-3 -7" stroke-width="3"/>
+          <ellipse cx="360" cy="128" rx="3" ry="4.5" fill="#3b1f4a"/>
+          <path id="smile" class="line" d="M338 146 q11 9 24 2"/>
+          <ellipse id="chomp" cx="350" cy="150" rx="10" ry="7.5" fill="#7a1f3d" stroke="#3b1f4a" stroke-width="3"/>
+
+          <path class="hair" data-m="messy" d="M292 78 L300 52 L309 74 L322 50 L325 78 L344 66 L337 98 C325 89 310 86 298 93 Z"/>
+          <path class="hair" data-m="combed fluffy" d="M291 76 C306 58 334 68 339 98 C327 90 312 86 298 93 Z"/>
+          <path class="hair wet" data-m="wet soapy" d="M291 78 C306 66 330 74 336 104 C326 94 312 88 298 94 Z"/>
+
+          <g class="wear off" data-w="kurdele" style="fill:var(--bow,#ff5fa8)">
+            <path class="acc" d="M258 90 L230 72 Q222 90 230 108 Z"/><path class="acc" d="M258 90 L286 72 Q294 90 286 108 Z"/>
+            <path class="acc" d="M254 94 L246 120 L257 112 L261 98 Z"/><circle class="acc" cx="258" cy="90" r="9"/>
+          </g>
+          <g class="wear off" data-w="cicek">
+            <g fill="#ff8fc7"><circle class="acc" cx="278" cy="50" r="9"/><circle class="acc" cx="291" cy="59" r="9"/><circle class="acc" cx="286" cy="74" r="9"/><circle class="acc" cx="270" cy="74" r="9"/><circle class="acc" cx="265" cy="59" r="9"/></g>
+            <circle class="acc" cx="278" cy="63" r="8" fill="#ffc928"/>
+          </g>
+          <g class="wear off" data-w="tac" transform="rotate(12 314 60)">
+            <path class="acc" d="M290 74 L286 42 L301 58 L314 34 L327 58 L342 42 L338 74 Z" fill="#ffc928"/>
+            <circle cx="314" cy="62" r="5" fill="#ef3b4d"/><circle cx="299" cy="65" r="3.5" fill="#3d8bff"/><circle cx="329" cy="65" r="3.5" fill="#2fb86b"/>
+          </g>
+          <g class="wear off" data-w="toka">
+            <path class="acc" d="M330 62 l5.5 11 12 1.8 -8.7 8.5 2 12 -10.8 -5.7 -10.8 5.7 2 -12 -8.7 -8.5 12 -1.8z" fill="#7fd8c3"/>
+          </g>
+          <g class="wear off" data-w="sapka"><path class="acc" d="M270 80 Q270 34 306 34 Q342 34 344 80 Z" fill="#ffd166"/><ellipse class="acc" cx="306" cy="80" rx="58" ry="12" fill="#ffd166"/><path d="M272 68 Q306 80 342 68" fill="none" stroke="#e8418a" stroke-width="7"/></g>
+          <g class="wear off" data-w="bone"><path class="acc" d="M258 108 Q258 58 306 58 Q352 58 356 100 Q306 78 258 108 Z" fill="#ffd166"/><path d="M264 98 Q306 72 352 92" fill="none" stroke="#e8418a" stroke-width="5"/></g>
+          <g class="wear off" data-w="gozluk"><path class="line" d="M306 104 L284 92"/><circle cx="324" cy="108" r="17" fill="#7a4fa0" fill-opacity=".85" stroke="#e8418a" stroke-width="5"/><path d="M316 100 q5 -6 12 -4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/></g>
+          <g class="wear off" data-w="deniz-gozlugu"><path d="M262 100 L308 106" stroke="#3b1f4a" stroke-width="7" stroke-linecap="round"/><rect x="306" y="92" width="36" height="32" rx="13" fill="#9fe3ff" fill-opacity=".8" stroke="#3d8bff" stroke-width="5"/></g>
+          <rect id="headspot" x="240" y="56" width="90" height="90" fill="none"/>
+          <rect id="mouthspot" x="320" y="122" width="60" height="50" fill="none"/>
+        </g>
+        <g id="fx"></g>
+      </g>
+
+      <!-- the pool water in front of her once she is in, and what floats on it -->
+      <g data-r="havuz">
+        <g class="front-water"><use href="#water" fill="#4db8ff" opacity=".74"/>
+          <path d="M150 300 q10 -7 20 0 t20 0 M300 330 q10 -7 20 0 t20 0 M420 304 q10 -7 20 0 t20 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/></g>
+        <g class="wear off bobber" data-w="top"><circle cx="516" cy="250" r="24" fill="#fff"/><path d="M516 226a24 24 0 0 1 20 11l-20 13z" fill="#ef3b4d"/><path d="M516 274a24 24 0 0 1-20-11l20-13z" fill="#3d8bff"/><path d="M492 250a24 24 0 0 1 4-13l20 13z" fill="#ffc928"/><circle class="acc" cx="516" cy="250" r="24" fill="none"/></g>
+        <g class="wear off bobber" data-w="ordek"><ellipse class="acc" cx="170" cy="258" rx="26" ry="15" fill="#ffd166"/><circle class="acc" cx="190" cy="236" r="14" fill="#ffd166"/><path class="acc" d="M202 232l12 4-12 5z" fill="#ff8a5c"/><circle cx="193" cy="232" r="2.5" fill="#3b1f4a"/><path d="M160 256q10 -8 20 0" fill="none" stroke="#e8a030" stroke-width="3" stroke-linecap="round"/></g>
+      </g>
+      <g id="fx2"></g>
     </svg>
     <button id="tag" hidden></button>
     <div id="confetti"></div>
@@ -279,18 +390,39 @@ const PACK = window.LM_AUDIO || null;
 /* =====================================================================
    WORDS: everything Baba might want to change lives up here.
    The same lists are in audio/lines.json, which the voice script reads.
+   r = the room a thing belongs to.
    ===================================================================== */
 const ITEMS = [
-  { id: 'sampuan', tr: 'Şampuan', en: 'shampoo' }, { id: 'sabun', tr: 'Sabun', en: 'soap' }, { id: 'su', tr: 'Su', en: 'water' },
-  { id: 'havlu', tr: 'Havlu', en: 'towel' }, { id: 'tarak', tr: 'Tarak', en: 'comb' }, { id: 'firca', tr: 'Fırça', en: 'brush' },
-  { id: 'makas', tr: 'Makas', en: 'scissors' }, { id: 'fon', tr: 'Fön', en: 'hairdryer' }, { id: 'toka', tr: 'Toka', en: 'hair clip' },
-  { id: 'cicek', tr: 'Çiçek', en: 'flower' }, { id: 'tac', tr: 'Taç', en: 'crown' }, { id: 'parfum', tr: 'Parfüm', en: 'perfume' },
-  { id: 'ayna', tr: 'Ayna', en: 'mirror' },
+  { id: 'sampuan', tr: 'Şampuan', en: 'shampoo', r: 'kuafor' }, { id: 'sabun', tr: 'Sabun', en: 'soap', r: 'kuafor' }, { id: 'su', tr: 'Su', en: 'water', r: 'kuafor' },
+  { id: 'havlu', tr: 'Havlu', en: 'towel', r: 'kuafor' }, { id: 'tarak', tr: 'Tarak', en: 'comb', r: 'kuafor' }, { id: 'firca', tr: 'Fırça', en: 'brush', r: 'kuafor' },
+  { id: 'makas', tr: 'Makas', en: 'scissors', r: 'kuafor' }, { id: 'fon', tr: 'Fön', en: 'hairdryer', r: 'kuafor' }, { id: 'toka', tr: 'Toka', en: 'hair clip', r: 'kuafor' },
+  { id: 'cicek', tr: 'Çiçek', en: 'flower', r: 'kuafor' }, { id: 'tac', tr: 'Taç', en: 'crown', r: 'kuafor' }, { id: 'parfum', tr: 'Parfüm', en: 'perfume', r: 'kuafor' },
+  { id: 'ayna', tr: 'Ayna', en: 'mirror', r: 'kuafor' },
+  { id: 'etek', tr: 'Etek', en: 'skirt', r: 'butik' }, { id: 'ayakkabi', tr: 'Ayakkabı', en: 'shoes', r: 'butik' }, { id: 'corap', tr: 'Çorap', en: 'socks', r: 'butik' },
+  { id: 'sapka', tr: 'Şapka', en: 'hat', r: 'butik' }, { id: 'kolye', tr: 'Kolye', en: 'necklace', r: 'butik' }, { id: 'atki', tr: 'Atkı', en: 'scarf', r: 'butik' },
+  { id: 'canta', tr: 'Çanta', en: 'bag', r: 'butik' }, { id: 'gozluk', tr: 'Gözlük', en: 'glasses', r: 'butik' },
+  { id: 'gunes-kremi', tr: 'Güneş kremi', en: 'sunscreen', r: 'havuz' }, { id: 'mayo', tr: 'Mayo', en: 'swimsuit', r: 'havuz' }, { id: 'bone', tr: 'Bone', en: 'swim cap', r: 'havuz' },
+  { id: 'deniz-gozlugu', tr: 'Deniz gözlüğü', en: 'goggles', r: 'havuz' }, { id: 'simit', tr: 'Simit', en: 'swim ring', r: 'havuz' }, { id: 'kolluk', tr: 'Kolluk', en: 'arm floats', r: 'havuz' },
+  { id: 'top', tr: 'Top', en: 'ball', r: 'havuz' }, { id: 'ordek', tr: 'Ördek', en: 'duck', r: 'havuz' }, { id: 'terlik', tr: 'Terlik', en: 'flip-flops', r: 'havuz' },
+  { id: 'kase', tr: 'Kase', en: 'bowl', r: 'pastane' }, { id: 'un', tr: 'Un', en: 'flour', r: 'pastane' }, { id: 'yumurta', tr: 'Yumurta', en: 'egg', r: 'pastane' },
+  { id: 'sut', tr: 'Süt', en: 'milk', r: 'pastane' }, { id: 'seker', tr: 'Şeker', en: 'sugar', r: 'pastane' }, { id: 'tereyagi', tr: 'Tereyağı', en: 'butter', r: 'pastane' },
+  { id: 'kasik', tr: 'Kaşık', en: 'spoon', r: 'pastane' }, { id: 'firin', tr: 'Fırın', en: 'oven', r: 'pastane' }, { id: 'krema', tr: 'Krema', en: 'cream', r: 'pastane' },
+  { id: 'cilek', tr: 'Çilek', en: 'strawberry', r: 'pastane' }, { id: 'cikolata', tr: 'Çikolata', en: 'chocolate', r: 'pastane' }, { id: 'mum', tr: 'Mum', en: 'candle', r: 'pastane' },
+  { id: 'elma', tr: 'Elma', en: 'apple', r: 'yemek' }, { id: 'havuc', tr: 'Havuç', en: 'carrot', r: 'yemek' }, { id: 'muz', tr: 'Muz', en: 'banana', r: 'yemek' },
+  { id: 'karpuz', tr: 'Karpuz', en: 'watermelon', r: 'yemek' }, { id: 'armut', tr: 'Armut', en: 'pear', r: 'yemek' }, { id: 'uzum', tr: 'Üzüm', en: 'grapes', r: 'yemek' },
+  { id: 'ekmek', tr: 'Ekmek', en: 'bread', r: 'yemek' },
+  { id: 'eyer', tr: 'Eyer', en: 'saddle', r: 'gezinti' }, { id: 'kask', tr: 'Kask', en: 'helmet', r: 'gezinti' }, { id: 'agac', tr: 'Ağaç', en: 'tree', r: 'gezinti' },
+  { id: 'kelebek', tr: 'Kelebek', en: 'butterfly', r: 'gezinti' }, { id: 'kus', tr: 'Kuş', en: 'bird', r: 'gezinti' }, { id: 'gunes', tr: 'Güneş', en: 'sun', r: 'gezinti' },
+  { id: 'bulut', tr: 'Bulut', en: 'cloud', r: 'gezinti' }, { id: 'gokkusagi', tr: 'Gökkuşağı', en: 'rainbow', r: 'gezinti' }, { id: 'ev', tr: 'Ev', en: 'house', r: 'gezinti' },
 ];
+// Things from another room that are also used here, or may turn up as a wrong choice.
+const BORROWED = { kuafor: [], butik: ['ayna', 'tac'], havuz: ['havlu', 'su'], pastane: [], yemek: ['su'], gezinti: ['cicek'] };
 const COLORS = [
   { id: 'pembe', tr: 'Pembe', en: 'pink', hex: '#ff5fa8' }, { id: 'mavi', tr: 'Mavi', en: 'blue', hex: '#3d8bff' }, { id: 'sari', tr: 'Sarı', en: 'yellow', hex: '#ffc928' },
   { id: 'mor', tr: 'Mor', en: 'purple', hex: '#9b5de5' }, { id: 'kirmizi', tr: 'Kırmızı', en: 'red', hex: '#ef3b4d' }, { id: 'yesil', tr: 'Yeşil', en: 'green', hex: '#2fb86b' },
 ];
+// Things that come in the six colors and are asked for by color: "Pembe kurdele", "Mavi elbise".
+const VARIANT = { kurdele: { tr: 'kurdele', en: 'ribbon' }, elbise: { tr: 'elbise', en: 'dress' } };
 // The names Leyla can give the pony. She picks up to three and the pony says them all in a row.
 const NAMES = [
   { id: 'zooey', show: 'Zooey', icon: '💜' }, { id: 'rosie', show: 'Rosie', icon: '🌹' }, { id: 'pamuk', show: 'Pamuk', icon: '🤍' }, { id: 'seker', show: 'Şeker', icon: '🍬' },
@@ -299,57 +431,122 @@ const NAMES = [
 const MAX_NAMES = 3;
 const LINES = {
   hello: ['Merhaba Leyla!', 'Hello Leyla!'], who: ['Benim adım ne? Sen seç!', "What's my name? You choose!"], myname: ['Benim adım...', 'My name is...'],
-  funny: ['Çok komik!', 'So funny!'], lovename: ['Bu adı çok sevdim!', 'I love this name!'], messy: ['Saçım çok dağınık! Yardım eder misin?', 'My hair is a mess! Will you help?'],
-  lookagain: ['Bir daha bak!', 'Look again!'], tickle: ['Gıdıklanıyorum!', 'That tickles!'],
+  funny: ['Çok komik!', 'So funny!'], lovename: ['Bu adı çok sevdim!', 'I love this name!'], where: ['Nereye gidelim?', 'Where shall we go?'],
+  messy: ['Saçım çok dağınık! Yardım eder misin?', 'My hair is a mess! Will you help?'], lookagain: ['Bir daha bak!', 'Look again!'], tickle: ['Gıdıklanıyorum!', 'That tickles!'],
   praise1: ['Aferin!', 'Well done!'], praise2: ['Harika!', 'Wonderful!'], praise3: ['Süper!', 'Super!'], praise4: ['Çok güzel!', 'Very nice!'], praise5: ['Teşekkür ederim!', 'Thank you!'],
   fx_bubbles: ['Köpük köpük!', 'Bubbles, bubbles!'], fx_water: ['Şırıl şırıl!', 'Splish splash!'], fx_towel: ['Oh, yumuşacık!', 'Ooh, so soft!'], fx_comb: ['Çok güzel taradın!', 'You combed it so nicely!'],
   fx_snip: ['Kırt kırt kırt!', 'Snip snip snip!'], fx_dryer: ['Vuuu! Sıcacık!', 'Whoosh! So warm!'], fx_wear: ['Bana çok yakıştı!', 'It suits me so well!'], fx_perfume: ['Mis gibi kokuyorum!', 'I smell lovely!'],
   done: ['Çok güzel oldum! Teşekkür ederim, Leyla!', 'I look so pretty! Thank you, Leyla!'], again: ['Tekrar oynayalım mı?', 'Shall we play again?'],
-};
-// What each thing does to the pony: [how her mane looks after, the little effect, what she says].
-const EFFECT = {
-  sampuan: ['soapy', 'bubbles', 'fx_bubbles'], sabun: ['soapy', 'bubbles', 'fx_bubbles'], su: ['wet', 'drops', 'fx_water'], havlu: ['messy', 'spark', 'fx_towel'],
-  tarak: ['combed', 'spark', 'fx_comb'], firca: ['combed', 'spark', 'fx_comb'], makas: [null, 'snip', 'fx_snip'], fon: ['fluffy', 'spark', 'fx_dryer'], parfum: [null, 'spark', 'fx_perfume'],
+  start_butik: ['Bugün ne giysem? Yardım eder misin?', 'What shall I wear today? Will you help?'], fx_chic: ['Çok şık oldum!', 'I look so smart!'], fx_love: ['Bayıldım!', 'I love it!'],
+  start_havuz: ['Yüzmeye gidelim! Önce hazırlanalım!', "Let's go swimming! First let's get ready!"], fx_sun: ['Güneş kremi sürdük!', 'Sunscreen is on!'], fx_float: ['Artık batmam!', "Now I won't sink!"],
+  fx_splash: ['Cup! Su çok güzel!', 'Splash! The water is lovely!'], fx_ball: ['Top oynayalım!', "Let's play ball!"], fx_duck: ['Vak vak vak!', 'Quack quack quack!'], fx_flip: ['Şıp şıp şıp!', 'Flip flop flip!'],
+  done_havuz: ['Çok eğlendim! Teşekkür ederim, Leyla!', 'That was so much fun! Thank you, Leyla!'],
+  start_pastane: ['Pasta yapalım! Yardım eder misin?', "Let's make a cake! Will you help?"], fx_bowl: ['Kase hazır!', 'The bowl is ready!'], fx_flour: ['Puf! Her yer un oldu!', 'Poof! Flour everywhere!'],
+  fx_egg: ['Çat! Yumurta kırıldı!', 'Crack! The egg broke!'], fx_milk: ['Lık lık lık!', 'Glug glug glug!'], fx_sweet: ['Mmm, tatlı tatlı!', 'Mmm, sweet!'], fx_butter: ['Yumuşacık tereyağı!', 'Soft butter!'],
+  fx_stir: ['Karıştır, karıştır!', 'Stir, stir!'], fx_oven: ['Fırında pişiyor... Ding! Pasta pişti!', "It's baking... Ding! The cake is done!"], fx_frost: ['Mmm, krema!', 'Mmm, cream!'],
+  fx_yum: ['Çok lezzetli görünüyor!', 'It looks delicious!'], done_pastane: ['Pasta hazır! Afiyet olsun, Leyla!', 'The cake is ready! Enjoy, Leyla!'],
+  start_yemek: ['Karnım acıktı! Bana yemek verir misin?', "I'm hungry! Will you feed me?"], fx_chomp: ['Ham ham ham!', 'Nom nom nom!'], fx_tasty: ['Mmm, çok lezzetli!', 'Mmm, so tasty!'],
+  fx_crunch: ['Kıtır kıtır!', 'Crunch crunch!'], fx_more: ['Bir tane daha istiyorum!', 'I want one more!'], done_yemek: ['Doydum! Teşekkür ederim, Leyla!', "I'm full! Thank you, Leyla!"],
+  start_gezinti: ['Gezmeye gidelim! Önce beni hazırla!', "Let's go for a ride! Get me ready first!"], fx_saddle: ['Eyer tamam! Hadi bin!', 'Saddle on! Hop on!'], fx_helmet: ['Kask tamam! Güvendeyiz!', "Helmet on! We're safe!"],
+  fx_ride: ['Deh! Dıgıdık, dıgıdık!', 'Giddy-up! Clip clop, clip clop!'], fx_look: ['Bak, ne güzel!', 'Look, how lovely!'], fx_wow: ['Vay canına!', 'Wow!'],
+  done_gezinti: ['Çüş! Geldik! Çok güzel bir gezinti oldu, Leyla!', 'Whoa! We are here! What a lovely ride, Leyla!'],
 };
 // Things too alike to be offered as each other's wrong choice.
-const TWIN = { sampuan: 'sabun', sabun: 'sampuan', tarak: 'firca', firca: 'tarak' };
+const TWIN = { sampuan: 'sabun', sabun: 'sampuan', tarak: 'firca', firca: 'tarak', un: 'seker', seker: 'un' };
 const PRAISE = ['praise1', 'praise2', 'praise3', 'praise4', 'praise5'];
 
 const itemOf = {}; ITEMS.forEach(i => { itemOf[i.id] = i; });
 const colorOf = {}; COLORS.forEach(c => { colorOf[c.id] = c; });
 const nameOf = {}; NAMES.forEach(n => { nameOf[n.id] = n; });
-const info = id => { if (id.indexOf('kurdele-') === 0) { const c = colorOf[id.slice(8)]; return { tr: c.tr + ' kurdele', en: c.en + ' ribbon', hex: c.hex }; } return itemOf[id]; };
+// "elbise-mavi" is the blue one of a thing that comes in colors.
+function variantOf(id) { const k = id.lastIndexOf('-'); if (k < 1) return null; const base = id.slice(0, k), c = colorOf[id.slice(k + 1)]; return c && VARIANT[base] ? { base, color: c } : null; }
+const info = id => { const v = variantOf(id); return v ? { tr: v.color.tr + ' ' + VARIANT[v.base].tr, en: v.color.en + ' ' + VARIANT[v.base].en, hex: v.color.hex } : itemOf[id]; };
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+const chance = p => Math.random() < p;
 const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* =====================================================================
    Pictures of the things, drawn here so they look the same on every tablet
    ===================================================================== */
 const K = 'stroke="#3b1f4a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
-function drawing(id) {
-  const c = id.indexOf('kurdele-') === 0 ? colorOf[id.slice(8)].hex : null;
-  const art = {
-    sampuan: `<rect x="19" y="22" width="26" height="36" rx="8" fill="#39c6b5" ${K}/><rect x="26" y="9" width="12" height="13" rx="3" fill="#ffd166" ${K}/><path d="M32 31q-8 10 0 15q8-5 0-15z" fill="#fff"/>`,
-    sabun: `<rect x="8" y="28" width="42" height="26" rx="11" fill="#ff9ec4" ${K}/><circle cx="46" cy="18" r="8" fill="#fff" stroke="#7cc8ff" stroke-width="3"/><circle cx="56" cy="32" r="4.5" fill="#fff" stroke="#7cc8ff" stroke-width="3"/><circle cx="33" cy="12" r="4.5" fill="#fff" stroke="#7cc8ff" stroke-width="3"/>`,
-    su: `<path d="M32 5C20 23 12 33 12 42a20 20 0 0 0 40 0C52 33 44 23 32 5z" fill="#4db8ff" ${K}/><path d="M21 42a11 11 0 0 0 9 11" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
-    havlu: `<rect x="9" y="14" width="46" height="36" rx="6" fill="#ffd166" ${K}/><path d="M11 25h42M11 39h42" stroke="#fff" stroke-width="5"/><path d="M15 50v8M24 50v8M32 50v8M40 50v8M49 50v8" ${K} fill="none"/>`,
-    tarak: `<path d="M13 30v20M20 30v20M27 30v20M34 30v20M41 30v20M48 30v20" fill="none" stroke="#3b1f4a" stroke-width="4" stroke-linecap="round"/><rect x="7" y="14" width="50" height="17" rx="6" fill="#b06cf0" ${K}/>`,
-    firca: `<rect x="36" y="36" width="26" height="10" rx="5" transform="rotate(38 36 36)" fill="#ff8a5c" ${K}/><ellipse cx="24" cy="25" rx="18" ry="15" fill="#ff8a5c" ${K}/><path d="M13 21v9M19 17v15M25 16v17M31 17v15M36 21v9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`,
-    makas: `<path d="M24 39L47 7" fill="none" stroke="#9aa5b1" stroke-width="7" stroke-linecap="round"/><path d="M40 39L17 7" fill="none" stroke="#b8c2cc" stroke-width="7" stroke-linecap="round"/><circle cx="18" cy="47" r="9" fill="none" stroke="#e8418a" stroke-width="6"/><circle cx="46" cy="47" r="9" fill="none" stroke="#e8418a" stroke-width="6"/><circle cx="32" cy="28" r="3" fill="#3b1f4a"/>`,
-    fon: `<rect x="17" y="34" width="13" height="26" rx="6" fill="#ff6fae" ${K}/><rect x="36" y="14" width="22" height="20" rx="4" fill="#ffb3d1" ${K}/><circle cx="25" cy="24" r="17" fill="#ff6fae" ${K}/><circle cx="25" cy="24" r="7" fill="#fff"/>`,
-    toka: `<rect x="7" y="42" width="50" height="11" rx="5.5" fill="#b8c2cc" ${K}/><path d="M32 5l7 14 15 2-11 11 3 15-14-7-14 7 3-15L10 21l15-2z" fill="#7fd8c3" ${K}/>`,
-    cicek: `<g fill="#ff8fc7" ${K}><circle cx="32" cy="14" r="11"/><circle cx="49" cy="26" r="11"/><circle cx="43" cy="46" r="11"/><circle cx="21" cy="46" r="11"/><circle cx="15" cy="26" r="11"/></g><circle cx="32" cy="32" r="10" fill="#ffc928" ${K}/>`,
-    tac: `<path d="M8 52L5 18l15 14L32 8l12 24 15-14-3 34z" fill="#ffc928" ${K}/><circle cx="32" cy="40" r="5.5" fill="#ef3b4d"/><circle cx="17" cy="43" r="3.8" fill="#3d8bff"/><circle cx="47" cy="43" r="3.8" fill="#2fb86b"/>`,
-    parfum: `<rect x="15" y="28" width="34" height="31" rx="9" fill="#c9a7ff" ${K}/><rect x="25" y="15" width="14" height="13" rx="2.5" fill="#ffc928" ${K}/><path d="M32 36l3 6 6.5 1-4.7 4.5 1 6.5-5.8-3-5.8 3 1-6.5-4.7-4.5 6.5-1z" fill="#fff"/><circle cx="49" cy="11" r="2.8" fill="#7cc8ff"/><circle cx="56" cy="7" r="2.2" fill="#7cc8ff"/><circle cx="57" cy="17" r="2.2" fill="#7cc8ff"/>`,
-    ayna: `<rect x="27" y="41" width="10" height="21" rx="5" fill="#e8418a" ${K}/><circle cx="32" cy="24" r="19" fill="#bfe9ff" stroke="#e8418a" stroke-width="6"/><path d="M21 21q4-9 13-10" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
-  };
-  const bow = c && `<path d="M28 36l-9 22 11-6 4-13z" fill="${c}" ${K}/><path d="M36 36l9 22-11-6-4-13z" fill="${c}" ${K}/><path d="M32 32L7 15Q0 32 7 49z" fill="${c}" ${K}/><path d="M32 32L57 15Q64 32 57 49z" fill="${c}" ${K}/><circle cx="32" cy="32" r="8.5" fill="${c}" ${K}/>`;
-  return '<svg viewBox="0 0 64 64" aria-hidden="true">' + (bow || art[id]) + '</svg>';
-}
+const BUB = 'fill="#fff" stroke="#7cc8ff" stroke-width="3"';
+const ART = {
+  sampuan: `<rect x="19" y="22" width="26" height="36" rx="8" fill="#39c6b5" ${K}/><rect x="26" y="9" width="12" height="13" rx="3" fill="#ffd166" ${K}/><path d="M32 31q-8 10 0 15q8-5 0-15z" fill="#fff"/>`,
+  sabun: `<rect x="8" y="28" width="42" height="26" rx="11" fill="#ff9ec4" ${K}/><circle cx="46" cy="18" r="8" ${BUB}/><circle cx="56" cy="32" r="4.5" ${BUB}/><circle cx="33" cy="12" r="4.5" ${BUB}/>`,
+  su: `<path d="M32 5C20 23 12 33 12 42a20 20 0 0 0 40 0C52 33 44 23 32 5z" fill="#4db8ff" ${K}/><path d="M21 42a11 11 0 0 0 9 11" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
+  havlu: `<rect x="9" y="14" width="46" height="36" rx="6" fill="#ffd166" ${K}/><path d="M11 25h42M11 39h42" stroke="#fff" stroke-width="5"/><path d="M15 50v8M24 50v8M32 50v8M40 50v8M49 50v8" ${K} fill="none"/>`,
+  tarak: `<path d="M13 30v20M20 30v20M27 30v20M34 30v20M41 30v20M48 30v20" fill="none" stroke="#3b1f4a" stroke-width="4" stroke-linecap="round"/><rect x="7" y="14" width="50" height="17" rx="6" fill="#b06cf0" ${K}/>`,
+  firca: `<rect x="36" y="36" width="26" height="10" rx="5" transform="rotate(38 36 36)" fill="#ff8a5c" ${K}/><ellipse cx="24" cy="25" rx="18" ry="15" fill="#ff8a5c" ${K}/><path d="M13 21v9M19 17v15M25 16v17M31 17v15M36 21v9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`,
+  makas: `<path d="M24 39L47 7" fill="none" stroke="#9aa5b1" stroke-width="7" stroke-linecap="round"/><path d="M40 39L17 7" fill="none" stroke="#b8c2cc" stroke-width="7" stroke-linecap="round"/><circle cx="18" cy="47" r="9" fill="none" stroke="#e8418a" stroke-width="6"/><circle cx="46" cy="47" r="9" fill="none" stroke="#e8418a" stroke-width="6"/><circle cx="32" cy="28" r="3" fill="#3b1f4a"/>`,
+  fon: `<rect x="17" y="34" width="13" height="26" rx="6" fill="#ff6fae" ${K}/><rect x="36" y="14" width="22" height="20" rx="4" fill="#ffb3d1" ${K}/><circle cx="25" cy="24" r="17" fill="#ff6fae" ${K}/><circle cx="25" cy="24" r="7" fill="#fff"/>`,
+  toka: `<rect x="7" y="42" width="50" height="11" rx="5.5" fill="#b8c2cc" ${K}/><path d="M32 5l7 14 15 2-11 11 3 15-14-7-14 7 3-15L10 21l15-2z" fill="#7fd8c3" ${K}/>`,
+  cicek: `<g fill="#ff8fc7" ${K}><circle cx="32" cy="14" r="11"/><circle cx="49" cy="26" r="11"/><circle cx="43" cy="46" r="11"/><circle cx="21" cy="46" r="11"/><circle cx="15" cy="26" r="11"/></g><circle cx="32" cy="32" r="10" fill="#ffc928" ${K}/>`,
+  tac: `<path d="M8 52L5 18l15 14L32 8l12 24 15-14-3 34z" fill="#ffc928" ${K}/><circle cx="32" cy="40" r="5.5" fill="#ef3b4d"/><circle cx="17" cy="43" r="3.8" fill="#3d8bff"/><circle cx="47" cy="43" r="3.8" fill="#2fb86b"/>`,
+  parfum: `<rect x="15" y="28" width="34" height="31" rx="9" fill="#c9a7ff" ${K}/><rect x="25" y="15" width="14" height="13" rx="2.5" fill="#ffc928" ${K}/><path d="M32 36l3 6 6.5 1-4.7 4.5 1 6.5-5.8-3-5.8 3 1-6.5-4.7-4.5 6.5-1z" fill="#fff"/><circle cx="49" cy="11" r="2.8" fill="#7cc8ff"/><circle cx="56" cy="7" r="2.2" fill="#7cc8ff"/><circle cx="57" cy="17" r="2.2" fill="#7cc8ff"/>`,
+  ayna: `<rect x="27" y="41" width="10" height="21" rx="5" fill="#e8418a" ${K}/><circle cx="32" cy="24" r="19" fill="#bfe9ff" stroke="#e8418a" stroke-width="6"/><path d="M21 21q4-9 13-10" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
+  // dress-up
+  etek: `<path d="M17 16h30l13 40H4z" fill="#ff8fc7" ${K}/><path d="M24 20l-6 34M32 20v36M40 20l6 34" fill="none" stroke="#e8418a" stroke-width="3" stroke-linecap="round"/><rect x="15" y="8" width="34" height="10" rx="4" fill="#e8418a" ${K}/>`,
+  ayakkabi: `<path d="M5 46q0-16 13-16l9 8q14 3 28 7q5 2 5 8v3H5z" fill="#ef3b4d" ${K}/><path d="M5 50h55" stroke="#fff" stroke-width="3"/><circle cx="22" cy="40" r="4" fill="#fff"/>`,
+  corap: `<path d="M22 5h20v29l13 9q7 7 1 13q-7 5-15 0L24 45q-4-4-2-11z" fill="#7fd8c3" ${K}/><path d="M23 14h18M23 23h18" stroke="#fff" stroke-width="4.5"/>`,
+  sapka: `<path d="M14 44q0-32 18-32t18 32z" fill="#ffd166" ${K}/><ellipse cx="32" cy="45" rx="29" ry="9" fill="#ffd166" ${K}/><path d="M15 37q17 8 34 0" fill="none" stroke="#e8418a" stroke-width="6"/>`,
+  kolye: `<path d="M9 9q23 46 46 0" fill="none" stroke="#9b5de5" stroke-width="3"/><g fill="#ff8fc7" ${K}><circle cx="13" cy="18" r="5"/><circle cx="19" cy="28" r="5"/><circle cx="45" cy="28" r="5"/><circle cx="51" cy="18" r="5"/></g><path d="M32 56q-17-13-10-23q6-5 10 3q4-8 10-3q7 10-10 23z" fill="#ef3b4d" ${K}/>`,
+  atki: `<path d="M8 12q24 18 48 0l3 13q-27 18-54 0z" fill="#3d8bff" ${K}/><path d="M34 31l11 27-13 3-9-28z" fill="#3d8bff" ${K}/><path d="M18 20l3-7M32 25v-8M46 20l-3-7M30 44l12-3" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
+  canta: `<path d="M20 27q0-20 12-20t12 20" fill="none" stroke="#3b1f4a" stroke-width="4.5" stroke-linecap="round"/><rect x="9" y="24" width="46" height="35" rx="10" fill="#9b5de5" ${K}/><circle cx="32" cy="39" r="5.5" fill="#ffd166" ${K}/>`,
+  gozluk: `<path d="M27 32q5-6 10 0" fill="none" stroke="#e8418a" stroke-width="4.5"/><circle cx="16" cy="34" r="12" fill="#7a4fa0" stroke="#e8418a" stroke-width="5"/><circle cx="48" cy="34" r="12" fill="#7a4fa0" stroke="#e8418a" stroke-width="5"/><path d="M10 30q3-5 8-5M42 30q3-5 8-5" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`,
+  // pool
+  'gunes-kremi': `<path d="M21 20h22l4 39H17z" fill="#ff8a5c" ${K}/><rect x="25" y="7" width="14" height="13" rx="3" fill="#fff" ${K}/><circle cx="32" cy="40" r="7" fill="#ffd166"/><path d="M32 28v-3M32 55v-3M20 40h-3M47 40h-3M23.5 31.5l-2-2M42.500 50.5l-2-2M23.500 48.5l-2 2M42.500 29.500l-2 2" stroke="#ffd166" stroke-width="2.5" stroke-linecap="round"/>`,
+  mayo: `<path d="M20 5v15q0 6-4 12q-5 16 8 27h16q13-11 8-27q-4-6-4-12V5h-7v8q-5 6-10 0V5z" fill="#39c6b5" ${K}/><g fill="#fff"><circle cx="25" cy="34" r="3.5"/><circle cx="39" cy="34" r="3.5"/><circle cx="32" cy="46" r="3.5"/></g>`,
+  bone: `<path d="M7 42q0-32 25-32t25 32q-25 11-50 0z" fill="#ffd166" ${K}/><path d="M9 39q23 10 46 0" fill="none" stroke="#e8418a" stroke-width="4.5"/>`,
+  'deniz-gozlugu': `<path d="M2 32h60" stroke="#3b1f4a" stroke-width="5" stroke-linecap="round"/><rect x="5" y="19" width="25" height="26" rx="11" fill="#9fe3ff" stroke="#3d8bff" stroke-width="5"/><rect x="34" y="19" width="25" height="26" rx="11" fill="#9fe3ff" stroke="#3d8bff" stroke-width="5"/>`,
+  simit: `<circle cx="32" cy="32" r="19" fill="none" stroke="#3b1f4a" stroke-width="22"/><circle cx="32" cy="32" r="19" fill="none" stroke="#fff" stroke-width="16"/><circle cx="32" cy="32" r="19" fill="none" stroke="#ef3b4d" stroke-width="16" stroke-dasharray="14.9 14.9"/>`,
+  kolluk: `<rect x="8" y="15" width="48" height="34" rx="15" fill="#ff8a5c" ${K}/><path d="M24 16v32M40 16v32" stroke="#fff" stroke-width="4"/><rect x="28" y="7" width="8" height="9" rx="2" fill="#fff" ${K}/>`,
+  top: `<circle cx="32" cy="32" r="26" fill="#fff"/><path d="M32 6a26 26 0 0 1 22 12L32 32z" fill="#ef3b4d"/><path d="M32 58a26 26 0 0 1-22-12l22-14z" fill="#3d8bff"/><path d="M6 32a26 26 0 0 1 4-14l22 14z" fill="#ffc928"/><path d="M58 32a26 26 0 0 1-4 14L32 32z" fill="#2fb86b"/><circle cx="32" cy="32" r="26" fill="none" ${K}/>`,
+  ordek: `<ellipse cx="28" cy="42" rx="23" ry="15" fill="#ffd166" ${K}/><circle cx="44" cy="22" r="13" fill="#ffd166" ${K}/><path d="M55 19l8 4-8 5z" fill="#ff8a5c" ${K}/><circle cx="47" cy="19" r="2.5" fill="#3b1f4a"/><path d="M17 41q10-8 20 0" fill="none" stroke="#e8a030" stroke-width="3" stroke-linecap="round"/>`,
+  terlik: `<rect x="18" y="4" width="28" height="56" rx="14" fill="#ff6fae" ${K}/><path d="M32 17L20 38M32 17l12 21" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`,
+  // bakery
+  kase: `<path d="M7 26h50q-2 31-25 31T7 26z" fill="#7fd8c3" ${K}/><ellipse cx="32" cy="26" rx="25" ry="6.5" fill="#fffaf3" ${K}/>`,
+  un: `<path d="M22 13q10-9 20 0l-2 7H24z" fill="#fff3d6" ${K}/><path d="M15 18q17-6 34 0l4 39H11z" fill="#fff3d6" ${K}/><rect x="13" y="32" width="38" height="12" fill="#d9a066"/><path d="M32 30v16M32 34l-5-3M32 34l5-3M32 40l-5-3M32 40l5-3" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`,
+  yumurta: `<ellipse cx="32" cy="35" rx="19" ry="24" fill="#fff7e6" ${K}/><path d="M22 28q2-9 9-11" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`,
+  sut: `<path d="M24 5h16v11l6 10v30q0 4-4 4H22q-4 0-4-4V26l6-10z" fill="#fff" ${K}/><rect x="19.500" y="33" width="25" height="14" fill="#7cc8ff"/><rect x="23" y="3" width="18" height="7" rx="2" fill="#3d8bff" ${K}/>`,
+  seker: `<rect x="7" y="34" width="22" height="22" rx="4" fill="#fff" ${K}/><rect x="33" y="34" width="22" height="22" rx="4" fill="#fff" ${K}/><rect x="20" y="12" width="22" height="22" rx="4" fill="#fff" ${K}/><path d="M50 10l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#ffc928"/>`,
+  tereyagi: `<path d="M7 29l34-11 16 9v19L23 57 7 48z" fill="#ffe08a" ${K}/><path d="M7 29l16 9 34-11M23 38v19" fill="none" ${K}/>`,
+  kasik: `<rect x="29" y="27" width="10" height="36" rx="5" transform="rotate(-42 29 27)" fill="#d9a066" ${K}/><ellipse cx="21" cy="20" rx="13" ry="16" transform="rotate(-42 21 20)" fill="#d9a066" ${K}/>`,
+  firin: `<rect x="7" y="7" width="50" height="51" rx="7" fill="#b8c2cc" ${K}/><circle cx="18" cy="15" r="3" fill="#3b1f4a"/><circle cx="32" cy="15" r="3" fill="#3b1f4a"/><circle cx="46" cy="15" r="3" fill="#3b1f4a"/><rect x="13" y="23" width="38" height="28" rx="5" fill="#3b1f4a"/><rect x="18" y="28" width="28" height="18" rx="3" fill="#ffb703"/>`,
+  krema: `<path d="M10 56q-4-13 10-15q-6-12 8-15q-3-12 4-20q8 9 4 20q13 3 7 15q13 2 9 15z" fill="#fff7fb" ${K}/><path d="M22 44q10 5 20 0M27 30q5 3 10 0" fill="none" stroke="#ffb3d1" stroke-width="3" stroke-linecap="round"/>`,
+  cilek: `<path d="M32 60Q7 41 13 22q19-10 38 0q6 19-19 38z" fill="#ef3b4d" ${K}/><path d="M19 21l13-13 13 13-13 5z" fill="#2fb86b" ${K}/><g fill="#ffd166"><circle cx="24" cy="32" r="2"/><circle cx="33" cy="36" r="2"/><circle cx="41" cy="31" r="2"/><circle cx="29" cy="45" r="2"/><circle cx="37" cy="46" r="2"/></g>`,
+  cikolata: `<rect x="9" y="9" width="46" height="48" rx="6" fill="#7b4a2a" ${K}/><path d="M9 25h46M9 41h46M24.500 9v48M39.500 9v48" stroke="#5a3418" stroke-width="3"/>`,
+  mum: `<rect x="24" y="24" width="16" height="36" rx="4" fill="#ff8fc7" ${K}/><path d="M25 36l14-6M25 48l14-6" stroke="#fff" stroke-width="4"/><path d="M32 3q10 10 0 20q-10-9 0-20z" fill="#ffb703" ${K}/>`,
+  // feeding
+  elma: `<path d="M32 19q-20-11-22 12q0 22 14 28q8 3 8-2q0 5 8 2q14-6 14-28q-2-23-22-12z" fill="#ef3b4d" ${K}/><path d="M32 19q0-9 6-13" fill="none" ${K}/><path d="M38 10q9-6 13 2q-9 5-13-2z" fill="#2fb86b" ${K}/>`,
+  havuc: `<path d="M32 24q-9-15-15-12M32 24q0-17 2-20M32 24q9-15 15-12" fill="none" stroke="#2fb86b" stroke-width="5" stroke-linecap="round"/><path d="M19 23q13-8 26 0L33.500 60q-1.500 2-3 0z" fill="#ff8a1f" ${K}/><path d="M25 33h9M29 44h7" stroke="#d96a00" stroke-width="2.500" stroke-linecap="round"/>`,
+  muz: `<path d="M10 12q3 36 41 41q7-2 3-9q-26-4-34-31q-5-7-10-1z" fill="#ffd93b" ${K}/><path d="M10 12l-2-6" ${K}/>`,
+  karpuz: `<path d="M5 22a27 27 0 0 0 54 0z" fill="#2fb86b" ${K}/><path d="M12 22a20 20 0 0 0 40 0z" fill="#ef3b4d"/><g fill="#3b1f4a"><circle cx="23" cy="28" r="2.200"/><circle cx="32" cy="35" r="2.200"/><circle cx="41" cy="28" r="2.200"/></g>`,
+  armut: `<path d="M32 13q-9 0-9 13q-12 8-12 20q0 14 21 14t21-14q0-12-12-20q0-13-9-13z" fill="#b5d94a" ${K}/><path d="M32 13q0-6 5-10" fill="none" ${K}/>`,
+  uzum: `<path d="M34 16q-2-8 6-12" fill="none" ${K}/><path d="M34 14q10-8 16 0q-8 6-16 0z" fill="#2fb86b" ${K}/><g fill="#9b5de5" ${K}><circle cx="20" cy="24" r="8"/><circle cx="34" cy="24" r="8"/><circle cx="48" cy="26" r="8"/><circle cx="27" cy="37" r="8"/><circle cx="41" cy="38" r="8"/><circle cx="34" cy="51" r="8"/></g>`,
+  ekmek: `<path d="M7 35q0-19 25-19t25 19v14q0 6-6 6H13q-6 0-6-6z" fill="#e0a45c" ${K}/><path d="M19 24l4 9M32 22v11M45 24l-4 9" stroke="#fff3d6" stroke-width="3.500" stroke-linecap="round"/>`,
+  // riding
+  eyer: `<path d="M7 22q25-13 50 2l-6 23q-19-10-38 0z" fill="#b9814a" ${K}/><path d="M32 41v9" fill="none" ${K}/><rect x="23" y="48" width="18" height="12" rx="4" fill="none" stroke="#9aa5b1" stroke-width="4.500"/>`,
+  kask: `<path d="M8 42q0-31 24-31t24 31z" fill="#ff6fae" ${K}/><path d="M6 41h40q11 0 14 9H6z" fill="#e8418a" ${K}/><path d="M32 12v28" stroke="#fff" stroke-width="3"/>`,
+  agac: `<rect x="27" y="38" width="10" height="24" rx="3" fill="#b9814a" ${K}/><circle cx="32" cy="24" r="20" fill="#2fb86b" ${K}/><circle cx="24" cy="18" r="4" fill="#7ee0a6"/>`,
+  kelebek: `<path d="M32 30Q14 5 7 22q-2 13 25 12z" fill="#ff8fc7" ${K}/><path d="M32 30Q50 5 57 22q2 13-25 12z" fill="#ff8fc7" ${K}/><path d="M32 34Q15 40 15 51q9 8 17-13z" fill="#9b5de5" ${K}/><path d="M32 34Q49 40 49 51q-9 8-17-13z" fill="#9b5de5" ${K}/><rect x="29.500" y="21" width="5" height="28" rx="2.500" fill="#3b1f4a"/>`,
+  kus: `<path d="M12 38l-9 6 11 2z" fill="#3d8bff" ${K}/><ellipse cx="30" cy="37" rx="20" ry="15" fill="#3d8bff" ${K}/><circle cx="46" cy="24" r="11" fill="#3d8bff" ${K}/><path d="M56 21l7 4-7 4z" fill="#ffc928" ${K}/><circle cx="49" cy="22" r="2.200" fill="#3b1f4a"/><path d="M19 35q10-10 21 0q-11 9-21 0z" fill="#7cc8ff" ${K}/>`,
+  gunes: `<path d="M32 3v9M32 52v9M3 32h9M52 32h9M11 11l7 7M46 46l7 7M11 53l7-7M46 18l7-7" stroke="#ffb703" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="32" r="15" fill="#ffc928" ${K}/>`,
+  bulut: `<path d="M16 47q-12 0-12-11q0-10 11-10q2-14 16-14q12 0 15 12q15-2 15 12q0 11-12 11z" fill="#fff" ${K}/>`,
+  gokkusagi: `<path d="M6 52a26 26 0 0 1 52 0" fill="none" stroke="#ef3b4d" stroke-width="6.500"/><path d="M12.500 52a19.500 19.500 0 0 1 39 0" fill="none" stroke="#ffc928" stroke-width="6.500"/><path d="M19 52a13 13 0 0 1 26 0" fill="none" stroke="#2fb86b" stroke-width="6.500"/><path d="M25.500 52a6.500 6.500 0 0 1 13 0" fill="none" stroke="#3d8bff" stroke-width="6.500"/>`,
+  ev: `<rect x="12" y="30" width="40" height="28" fill="#fff3d6" ${K}/><path d="M5 31L32 8l27 23z" fill="#ef3b4d" ${K}/><rect x="27" y="40" width="10" height="18" fill="#b9814a" ${K}/><rect x="16" y="36" width="8" height="8" fill="#7cc8ff" ${K}/><rect x="40" y="36" width="8" height="8" fill="#7cc8ff" ${K}/>`,
+  // a cake, for the bakery's door
+  pasta: `<rect x="28.500" y="4" width="7" height="16" rx="2" fill="#ff8fc7" ${K}/><rect x="9" y="30" width="46" height="26" rx="6" fill="#f2c27b" ${K}/><path d="M7 32q0-13 25-13t25 13q-4 9-10 2q-7 9-15 0q-8 9-15 0q-6 7-10-2z" fill="#fff7fb" ${K}/>`,
+};
+const VARIANT_ART = {
+  kurdele: c => `<path d="M28 36l-9 22 11-6 4-13z" fill="${c}" ${K}/><path d="M36 36l9 22-11-6-4-13z" fill="${c}" ${K}/><path d="M32 32L7 15Q0 32 7 49z" fill="${c}" ${K}/><path d="M32 32L57 15Q64 32 57 49z" fill="${c}" ${K}/><circle cx="32" cy="32" r="8.500" fill="${c}" ${K}/>`,
+  elbise: c => `<path d="M22 5h20l5 14-7 5 14 34H10l14-34-7-5z" fill="${c}" ${K}/><path d="M25 5q7 9 14 0" fill="none" stroke="#fff" stroke-width="3.500" stroke-linecap="round"/><path d="M24 25h16" stroke="#fff" stroke-width="3.500" stroke-linecap="round"/>`,
+};
+function drawing(id) { const v = variantOf(id); return '<svg viewBox="0 0 64 64" aria-hidden="true">' + (v ? VARIANT_ART[v.base](v.color.hex) : ART[id]) + '</svg>'; }
 const ICON_PLAY = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M13 7l20 13-20 13z" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round"/></svg>';
 const ICON_OK = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 21l9 9 17-19" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_AGAIN = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M32 20a12 12 0 1 1-4-9" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M30 3v10H20z" fill="#fff"/></svg>';
+const ICON_DOOR = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 20L20 6l15 14" fill="none" stroke="#3b1f4a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 19v15h20V19" fill="none" stroke="#3b1f4a" stroke-width="5" stroke-linejoin="round"/><rect x="17" y="24" width="6" height="10" fill="#3b1f4a"/></svg>';
 
 /* =====================================================================
    Sound: recorded clips, played through the game's own audio output
@@ -399,38 +596,51 @@ async function say(ids, onEach) {
   return my === talk;
 }
 const sayLine = id => { show(LINES[id][0], LINES[id][1]); return say(['line/' + id]); };
+const showLineFor = id => { const k = id.slice(5); if (LINES[k]) show(LINES[k][0], LINES[k][1]); };
 
 /* =====================================================================
-   The pony
+   The pony and her rooms
    ===================================================================== */
-const pony = $('pony'), bounce = $('bounce'), fx = $('fx');
+const pony = $('pony'), bounce = $('bounce');
 const NS = 'http://www.w3.org/2000/svg';
 function setMane(state) { pony.dataset.mane = state; }
-function wear(what, on) { $('acc-' + what).classList.toggle('off', !on); }
-function resetPony(mane) { setMane(mane); ['bow', 'cicek', 'tac', 'toka'].forEach(a => wear(a, false)); fx.textContent = ''; }
+function wear(what, on) { pony.querySelectorAll('[data-w="' + what + '"]').forEach(g => g.classList.toggle('off', !on)); }
+function swim(on) { pony.classList.toggle('swim', on); }
+function setRoom(id) { if (id) { pony.dataset.room = id; document.body.dataset.room = id; } else { delete pony.dataset.room; delete document.body.dataset.room; } }
+function ride(on) { pony.classList.toggle('ride', on); document.body.classList.toggle('ride', on); }
+function resetPony(mane) { setMane(mane); swim(false); ride(false); pony.classList.remove('chomp'); pony.querySelectorAll('.wear').forEach(g => g.classList.add('off')); ['fx', 'fx2', 'sights'].forEach(id => { $(id).textContent = ''; }); pony.style.removeProperty('--batter'); }
+// She opens her mouth and munches, with crumbs.
+function chomp() { burst('spark', 'mouth'); if (reduce) return; pony.classList.remove('chomp'); void pony.getBoundingClientRect(); pony.classList.add('chomp'); setTimeout(() => pony.classList.remove('chomp'), 1150); }
+// On a ride, each thing Leyla finds appears in the world around them: [x, y, size].
+const SIGHT_AT = { gunes: [468, 8, 1.3], bulut: [14, 12, 1.5], gokkusagi: [176, -10, 3.2], kelebek: [462, 150, 0.9], kus: [22, 118, 1.0], agac: [452, 176, 1.7], ev: [4, 216, 1.7], cicek: [492, 304, 0.75] };
+function sight(id) { const p = SIGHT_AT[id]; if (!p) return; const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `translate(${p[0]} ${p[1]}) scale(${p[2]})`); g.innerHTML = ART[id]; $('sights').append(g); }
 function hop(cls) { if (reduce) return; bounce.classList.remove('jump', 'twirl'); void bounce.getBoundingClientRect(); bounce.classList.add(cls || 'jump'); setTimeout(() => bounce.classList.remove(cls || 'jump'), cls === 'twirl' ? 1150 : 520); }
-function burst(kind) {
+// A little shower of bubbles, drops, stars or hair snips: around her mane, or over the bowl on the table.
+function burst(kind, where) {
   if (reduce) return;
+  const layer = where === 'bowl' ? $('fx2') : $('fx');
+  const box = where === 'bowl' ? [432, 150, 80, 70] : where === 'mouth' ? [322, 128, 56, 40] : [205, 60, 120, 130], cx = box[0], cy = box[1], w = box[2], h = box[3];
   const n = kind === 'drops' ? 14 : 10;
   for (let i = 0; i < n; i++) {
-    const x = 205 + Math.random() * 120, y = 60 + Math.random() * 130; let el;
+    const x = cx + Math.random() * w, y = cy + Math.random() * h; let el;
     if (kind === 'bubbles') { el = document.createElementNS(NS, 'circle'); el.setAttribute('cx', x); el.setAttribute('cy', y); el.setAttribute('r', 6 + Math.random() * 9); el.setAttribute('class', 'sud fx-bub'); }
-    else if (kind === 'drops') { el = document.createElementNS(NS, 'ellipse'); el.setAttribute('cx', x); el.setAttribute('cy', y - 30); el.setAttribute('rx', 4); el.setAttribute('ry', 8); el.setAttribute('fill', '#4db8ff'); el.setAttribute('class', 'fx-drop'); }
+    else if (kind === 'drops') { el = document.createElementNS(NS, 'ellipse'); el.setAttribute('cx', x); el.setAttribute('cy', y - 30); el.setAttribute('rx', 4); el.setAttribute('ry', 8); el.setAttribute('fill', where === 'bowl' ? '#fff' : '#4db8ff'); el.setAttribute('stroke', '#7cc8ff'); el.setAttribute('class', 'fx-drop'); }
     else if (kind === 'snip') { el = document.createElementNS(NS, 'rect'); el.setAttribute('x', x - 30); el.setAttribute('y', y + 20); el.setAttribute('width', 14); el.setAttribute('height', 6); el.setAttribute('rx', 3); el.setAttribute('fill', '#ff7fbf'); el.setAttribute('stroke', '#3b1f4a'); el.setAttribute('stroke-width', 2); el.setAttribute('class', 'fx-snip'); }
     else { el = document.createElementNS(NS, 'path'); el.setAttribute('d', `M${x} ${y - 12}l3 9 9 3-9 3-3 9-3-9-9-3 9-3z`); el.setAttribute('fill', '#ffc928'); el.setAttribute('stroke', '#3b1f4a'); el.setAttribute('stroke-width', 2); el.setAttribute('class', 'fx-spark'); }
     el.style.animationDelay = (Math.random() * 0.35) + 's';
-    fx.append(el); setTimeout(() => el.remove(), 2000);
+    layer.append(el); setTimeout(() => el.remove(), 2000);
   }
 }
+function stir() { if (reduce) return; const b = $('bowl'); b.classList.remove('stir'); void b.getBoundingClientRect(); b.classList.add('stir'); setTimeout(() => b.classList.remove('stir'), 1000); }
 function confetti() {
   if (reduce) return;
   const box = $('confetti'), cols = COLORS.map(c => c.hex);
   for (let i = 0; i < 46; i++) { const p = document.createElement('i'); p.style.left = Math.random() * 100 + '%'; p.style.background = pick(cols); p.style.animationDelay = Math.random() * 0.9 + 's'; p.style.animationDuration = 2 + Math.random() * 1.4 + 's'; box.append(p); setTimeout(() => p.remove(), 4200); }
 }
-// The picture on a button flies up to the pony.
-function fly(btn) {
+// The picture on a button flies up to the pony (or to the bowl).
+function fly(btn, spot) {
   if (reduce) return Promise.resolve();
-  const r = btn.getBoundingClientRect(), h = $('headspot').getBoundingClientRect();
+  const r = btn.getBoundingClientRect(), h = $(spot).getBoundingClientRect();
   const ghost = btn.firstElementChild.cloneNode(true); ghost.classList.add('ghost');
   ghost.style.left = r.left + 'px'; ghost.style.top = r.top + 'px'; ghost.style.width = r.width + 'px'; ghost.style.height = r.height + 'px';
   document.body.append(ghost);
@@ -442,28 +652,108 @@ function fly(btn) {
   });
 }
 
+// Each room: its name, the picture on its door, how her mane starts, what she says at the start and the end,
+// the list of things for one visit, and what each thing does. use() returns the line she says next (or nothing).
+const batter = c => pony.style.setProperty('--batter', c);
+const worn = first => (S.worn++ ? pick(PRAISE) : first);
+const ROOMS = {
+  kuafor: { tr: 'Kuaför', en: 'hair salon', pic: 'tarak', mane: 'messy', start: 'messy', done: 'done',
+    // wash, rinse, dry, comb, maybe a trim, blow-dry, a ribbon of some color, something pretty, maybe perfume, then the mirror
+    plan() { const s = [pick(['sampuan', 'sabun']), 'su', 'havlu', pick(['tarak', 'firca'])]; if (chance(0.6)) s.push('makas'); s.push('fon', 'kurdele-' + pick(COLORS).id, pick(['toka', 'cicek', 'tac'])); if (chance(0.6)) s.push('parfum'); s.push('ayna'); return s; },
+    use(t, inf) {
+      switch (t) {
+        case 'sampuan': case 'sabun': setMane('soapy'); burst('bubbles'); return 'fx_bubbles';
+        case 'su': setMane('wet'); burst('drops'); return 'fx_water';
+        case 'havlu': setMane('messy'); burst('spark'); return 'fx_towel';
+        case 'tarak': case 'firca': setMane('combed'); burst('spark'); return 'fx_comb';
+        case 'makas': burst('snip'); return 'fx_snip';
+        case 'fon': setMane('fluffy'); burst('spark'); return 'fx_dryer';
+        case 'parfum': burst('spark'); return 'fx_perfume';
+        case 'ayna': return null;
+      }
+      if (inf.hex) { pony.style.setProperty('--bow', inf.hex); wear('kurdele', true); } else wear(t, true);
+      burst('spark'); return worn('fx_wear');
+    } },
+  butik: { tr: 'Butik', en: 'dress-up', pic: 'elbise-pembe', mane: 'fluffy', start: 'start_butik', done: 'done',
+    // a dress of some color or a skirt, maybe socks, shoes, a necklace or a scarf, a hat, maybe a bag, maybe glasses, then the mirror
+    plan() { const s = [chance(0.7) ? 'elbise-' + pick(COLORS).id : 'etek']; if (chance(0.5)) s.push('corap'); s.push('ayakkabi', pick(['kolye', 'atki']), 'sapka'); if (chance(0.6)) s.push('canta'); if (chance(0.6)) s.push('gozluk'); s.push('ayna'); return s; },
+    use(t, inf) {
+      if (t === 'ayna') return null;
+      if (inf.hex) { pony.style.setProperty('--dress', inf.hex); wear('elbise', true); } else wear(t, true);
+      burst('spark'); const n = S.worn++; return n === 0 ? 'fx_wear' : n === 2 ? 'fx_chic' : n === 4 ? 'fx_love' : pick(PRAISE);
+    } },
+  havuz: { tr: 'Havuz', en: 'pool', pic: 'simit', mane: 'combed', start: 'start_havuz', done: 'done_havuz',
+    // sunscreen, swimsuit, cap, goggles, a ring or arm floats (then she jumps in), a ball or a duck, the towel, flip-flops
+    plan() { return ['gunes-kremi', 'mayo', 'bone', 'deniz-gozlugu', pick(['simit', 'kolluk']), pick(['top', 'ordek']), 'havlu', 'terlik']; },
+    use(t) {
+      switch (t) {
+        case 'gunes-kremi': burst('spark'); return 'fx_sun';
+        case 'simit': case 'kolluk': wear(t, true); return 'fx_float';
+        case 'top': wear(t, true); return 'fx_ball';
+        case 'ordek': wear(t, true); return 'fx_duck';
+        case 'havlu': swim(false); ['bone', 'deniz-gozlugu', 'simit', 'kolluk'].forEach(w => wear(w, false)); setMane('fluffy'); burst('spark'); return 'fx_towel';
+        case 'terlik': wear(t, true); return 'fx_flip';
+      }
+      wear(t, true); burst('spark'); return worn('fx_wear');
+    },
+    after(t) { if (t !== 'simit' && t !== 'kolluk') return null; swim(true); setMane('wet'); burst('drops'); hop(); return 'fx_splash'; } },
+  pastane: { tr: 'Pastane', en: 'bakery', pic: 'pasta', mane: 'fluffy', start: 'start_pastane', done: 'done_pastane', spot: 'bowlspot',
+    // the bowl, flour, egg, milk, sugar, maybe butter, the spoon to stir, the oven, cream, strawberries or chocolate, a candle
+    plan() { const s = ['kase', 'un', 'yumurta', 'sut', 'seker']; if (chance(0.5)) s.push('tereyagi'); s.push('kasik', 'firin', 'krema', pick(['cilek', 'cikolata']), 'mum'); return s; },
+    use(t) {
+      switch (t) {
+        case 'kase': wear('kase', true); batter('#fffaf3'); return 'fx_bowl';
+        case 'un': batter('#ffffff'); burst('bubbles', 'bowl'); return 'fx_flour';
+        case 'yumurta': batter('#ffe08a'); return 'fx_egg';
+        case 'sut': batter('#fff1cf'); burst('drops', 'bowl'); return 'fx_milk';
+        case 'seker': burst('spark', 'bowl'); return 'fx_sweet';
+        case 'tereyagi': batter('#ffe9a8'); return 'fx_butter';
+        case 'kasik': batter('#f6d58e'); stir(); return 'fx_stir';
+        case 'firin': wear('kase', false); wear('pasta', true); burst('spark', 'bowl'); return 'fx_oven';
+        case 'krema': wear('krema', true); return 'fx_frost';
+        case 'cilek': case 'cikolata': wear(t, true); return 'fx_yum';
+        case 'mum': wear('mum', true); burst('spark', 'bowl'); return null;
+      }
+      return null;
+    } },
+  yemek: { tr: 'Yemek', en: 'feeding', pic: 'elma', mane: 'combed', start: 'start_yemek', done: 'done_yemek', spot: 'mouthspot',
+    // five things to eat, with a drink of water in the middle
+    plan() { const s = shuffle(['elma', 'havuc', 'muz', 'karpuz', 'armut', 'uzum', 'ekmek']).slice(0, 5); s.splice(3, 0, 'su'); return s; },
+    use(t) { chomp(); if (t === 'su') return 'fx_milk'; if (t === 'elma' || t === 'havuc') return 'fx_crunch'; return ['fx_chomp', 'fx_tasty', 'fx_more'][S.worn++ % 3]; } },
+  gezinti: { tr: 'Gezinti', en: 'riding', pic: 'kask', mane: 'combed', start: 'start_gezinti', done: 'done_gezinti',
+    // the saddle (Leyla hops on), her helmet (off they trot), then four things to spot on the way
+    plan() { return ['eyer', 'kask'].concat(shuffle(['agac', 'kelebek', 'kus', 'gunes', 'bulut', 'gokkusagi', 'ev', 'cicek']).slice(0, 4)); },
+    use(t) {
+      if (t === 'eyer') { wear('eyer', true); wear('binici', true); burst('spark'); return 'fx_saddle'; }
+      if (t === 'kask') { wear('kask', true); burst('spark'); return 'fx_helmet'; }
+      sight(t); return ['fx_look', 'fx_wow', 'praise2'][S.worn++ % 3];
+    },
+    after(t) { if (t !== 'kask') return null; ride(true); return 'fx_ride'; } },
+};
+const ROOM_ORDER = ['kuafor', 'butik', 'havuz', 'pastane', 'yemek', 'gezinti'];
+
 /* =====================================================================
    The game
    ===================================================================== */
-const S = { mode: 'title', names: [], picking: [], visit: 0, steps: [], i: 0, wrong: 0, busy: false, worn: 0, last: [] };
+const S = { mode: 'title', room: null, names: [], picking: [], visits: {}, steps: [], i: 0, wrong: 0, busy: false, worn: 0, last: [] };
 const shelf = $('shelf');
 function show(tr, en) { $('word').textContent = tr; $('gloss').textContent = en || ''; }
 function setMode(m) { S.mode = m; document.body.dataset.mode = m; }
 function fullName() { return S.names.map(id => nameOf[id].show).join(' '); }
 function drawTag(ids) { const t = $('tag'); t.textContent = ids.map(id => nameOf[id].show).join(' '); t.hidden = !ids.length; }
-function bigButton(icon, label, onTap) { const b = document.createElement('button'); b.className = 'go'; b.innerHTML = icon; b.setAttribute('aria-label', label); b.onclick = onTap; return b; }
+function bigButton(icon, label, onTap, small) { const b = document.createElement('button'); b.className = 'go' + (small ? ' small' : ''); b.innerHTML = icon; b.setAttribute('aria-label', label); b.onclick = onTap; return b; }
 function loadNames() { try { const v = JSON.parse(localStorage.getItem('lm-names') || '[]'); if (Array.isArray(v)) return v.filter(id => nameOf[id]).slice(0, MAX_NAMES); } catch (e) {} return []; }
 function saveNames() { try { localStorage.setItem('lm-names', JSON.stringify(S.names)); } catch (e) {} }
 
 function showTitle() {
-  setMode('title'); S.busy = false; resetPony('combed'); $('steps').textContent = ''; drawTag(S.names);
+  setMode('title'); S.busy = false; setRoom(null); resetPony('combed'); $('steps').textContent = ''; drawTag(S.names);
   show("Leyla'nın Midillisi", "Leyla's pony");
   shelf.textContent = '';
-  shelf.append(bigButton(ICON_PLAY, 'Oyna', () => { initAudio(); if (S.names.length) startVisit(true); else startNaming(true); }));
+  shelf.append(bigButton(ICON_PLAY, 'Oyna', () => { initAudio(); if (S.names.length) showRooms(true); else startNaming(true); }));
 }
 
 function startNaming(first) {
-  setMode('naming'); S.busy = false; S.picking = []; drawTag([]); $('steps').textContent = ''; resetPony('combed');
+  setMode('naming'); S.busy = false; S.picking = []; setRoom(null); drawTag([]); $('steps').textContent = ''; resetPony('combed');
   shelf.textContent = '';
   const ok = bigButton(ICON_OK, 'Tamam', confirmNames); ok.disabled = true; ok.id = 'ok';
   NAMES.forEach(n => {
@@ -481,36 +771,44 @@ function startNaming(first) {
   });
   shelf.append(ok);
   show(LINES.who[0], LINES.who[1]);
-  say(first ? ['line/hello', 'line/who'] : ['line/who'], id => { const k = id.slice(5); show(LINES[k][0], LINES[k][1]); });
+  say(first ? ['line/hello', 'line/who'] : ['line/who'], showLineFor);
 }
 async function confirmNames() {
   if (S.busy || !S.picking.length) return;
   S.busy = true; S.names = S.picking.slice(); saveNames(); drawTag(S.names); shelf.textContent = '';
   show('Benim adım ' + fullName() + '!', 'My name is ' + fullName() + '!');
   await say(['line/myname'].concat(S.names.map(id => 'name/' + id), ['line/funny']), id => { if (id.indexOf('name/') === 0) hop(); if (id === 'line/funny') { hop('twirl'); show(LINES.funny[0], LINES.funny[1]); } });
-  startVisit(false);
+  showRooms(false);
 }
 
-// One visit to the salon: wash, rinse, dry, comb, maybe a trim, blow-dry, a ribbon of some color, something pretty, maybe perfume, then the mirror.
-function plan() {
-  const steps = [pick(['sampuan', 'sabun']), 'su', 'havlu', pick(['tarak', 'firca'])];
-  if (Math.random() < 0.6) steps.push('makas');
-  steps.push('fon', 'kurdele-' + pick(COLORS).id, pick(['toka', 'cicek', 'tac']));
-  if (Math.random() < 0.6) steps.push('parfum');
-  steps.push('ayna');
-  return steps;
+// The four doors. Each one says its name when touched, then she goes in.
+function showRooms(hello) {
+  setMode('rooms'); S.busy = false; S.room = null; setRoom(null); resetPony('combed'); $('steps').textContent = ''; drawTag(S.names);
+  shelf.textContent = '';
+  ROOM_ORDER.forEach(id => {
+    const b = document.createElement('button'); b.className = 'pick'; b.id = 'room-' + id; b.innerHTML = drawing(ROOMS[id].pic); b.setAttribute('aria-label', ROOMS[id].tr);
+    b.onclick = async () => { if (S.busy) return; initAudio(); S.busy = true; b.classList.add('right'); show(ROOMS[id].tr, ROOMS[id].en); hop(); await say(['word/room-' + id]); startVisit(id); };
+    shelf.append(b);
+  });
+  show(LINES.where[0], LINES.where[1]);
+  say(hello ? ['line/hello', 'line/where'] : ['line/where'], showLineFor);
 }
-// How many pictures to choose from: two at the very start, then three, and four once she has played a few times.
+
+// How many pictures to choose from: two at the very start of a room, then three, and four once she has been there a few times.
 function choicesFor(target) {
-  const n = S.visit <= 1 ? (S.i < 3 ? 2 : 3) : S.visit >= 4 ? 4 : 3;
-  const pool = target.indexOf('kurdele-') === 0 ? COLORS.map(c => 'kurdele-' + c.id).filter(x => x !== target) : ITEMS.map(i => i.id).filter(x => x !== target && x !== TWIN[target]);
+  const visit = S.visits[S.room] || 1, n = visit <= 1 ? (S.i < 3 ? 2 : 3) : visit >= 4 ? 4 : 3;
+  const v = variantOf(target);
+  const pool = v ? COLORS.map(c => v.base + '-' + c.id).filter(x => x !== target)
+                 : ITEMS.filter(i => i.r === S.room).map(i => i.id).concat(BORROWED[S.room] || []).filter(x => x !== target && x !== TWIN[target]);
   return shuffle([target].concat(shuffle(pool).slice(0, n - 1)));
 }
 function drawSteps() { const el = $('steps'); el.textContent = ''; S.steps.forEach((s, i) => { const d = document.createElement('i'); d.className = i < S.i ? 'done' : i === S.i ? 'now' : ''; el.append(d); }); }
 
-async function startVisit(hello) {
-  setMode('salon'); S.busy = true; S.visit++; S.steps = plan(); S.i = 0; S.worn = 0; resetPony('messy'); drawTag(S.names); drawSteps(); shelf.textContent = '';
-  await say(hello ? ['line/hello', 'line/messy'] : ['line/messy'], id => { const k = id.slice(5); show(LINES[k][0], LINES[k][1]); });
+async function startVisit(room) {
+  const R = ROOMS[room];
+  setMode('visit'); S.busy = true; S.room = room; S.visits[room] = (S.visits[room] || 0) + 1; S.steps = R.plan(); S.i = 0; S.worn = 0;
+  setRoom(room); resetPony(R.mane); drawTag(S.names); drawSteps(); shelf.textContent = '';
+  await sayLine(R.start);
   nextStep();
 }
 function ask() { const t = S.steps[S.i], inf = info(t); show(inf.tr + '!', inf.en); return say(['ask/' + t]); }
@@ -524,9 +822,9 @@ function nextStep() {
   S.busy = false; ask();
 }
 async function choose(btn, id) {
-  if (S.busy || S.mode !== 'salon') return;
+  if (S.busy || S.mode !== 'visit') return;
   S.busy = true;
-  const target = S.steps[S.i], inf = info(id);
+  const R = ROOMS[S.room], target = S.steps[S.i], inf = info(id);
   show(inf.tr, inf.en);                                             // whatever she touches says its own name
   if (id !== target) {
     S.wrong++; btn.classList.add('wobble');
@@ -537,40 +835,45 @@ async function choose(btn, id) {
   }
   btn.classList.add('right'); shelf.querySelectorAll('.pick').forEach(b => { b.disabled = true; b.classList.remove('hint'); });
   const spoken = say(['word/' + id]);
-  await fly(btn); btn.style.visibility = 'hidden';
-  let reaction;
-  if (EFFECT[target]) { const e = EFFECT[target]; if (e[0]) setMane(e[0]); burst(e[1]); reaction = e[2]; }
-  else if (target === 'ayna') reaction = null;
-  else { if (inf.hex) { pony.style.setProperty('--bow', inf.hex); wear('bow', true); } else wear(target, true); burst('spark'); reaction = S.worn++ ? pick(PRAISE) : 'fx_wear'; }
+  await fly(btn, R.spot || 'headspot'); btn.style.visibility = 'hidden';
+  const reaction = R.use(target, inf);
   hop(); await spoken;
   S.i++; drawSteps();
+  if (S.i >= S.steps.length) { finale(); return; }                   // the last thing leads straight into the ending
   if (reaction) await sayLine(reaction);
+  const more = R.after && R.after(target);
+  if (more) await sayLine(more);
   nextStep();
 }
 async function finale() {
-  setMode('finale'); S.busy = true; shelf.textContent = ''; confetti(); hop('twirl'); burst('spark');
-  await sayLine('done');
+  const R = ROOMS[S.room];
+  setMode('finale'); S.busy = true; shelf.textContent = ''; ride(false); confetti(); hop('twirl'); burst('spark');
+  await sayLine(R.done);
   show(fullName() + '!', '');
   await say(S.names.map(id => 'name/' + id), () => hop());
   hop('twirl'); confetti();
-  shelf.append(bigButton(ICON_AGAIN, 'Tekrar oyna', () => { initAudio(); startVisit(false); }));
+  shelf.append(bigButton(ICON_AGAIN, 'Tekrar oyna', () => { initAudio(); startVisit(S.room); }));
+  const door = bigButton(ICON_DOOR, 'Başka oda', () => { initAudio(); showRooms(false); }, true); door.id = 'door'; shelf.append(door);
   S.busy = false; sayLine('again');
 }
 
 // Tapping the pony tickles her. Tapping her name tag lets Leyla rename her (not in the middle of a visit).
 pony.addEventListener('click', () => {
-  if (S.busy || (S.mode !== 'salon' && S.mode !== 'finale')) return;
-  hop(); const wasSalon = S.mode === 'salon';
-  sayLine('tickle').then(ok => { if (ok && wasSalon && S.mode === 'salon' && !S.busy) ask(); });
+  if (S.busy || (S.mode !== 'visit' && S.mode !== 'finale' && S.mode !== 'rooms')) return;
+  hop(); const wasVisit = S.mode === 'visit';
+  sayLine('tickle').then(ok => { if (ok && wasVisit && S.mode === 'visit' && !S.busy) ask(); });
 });
-$('tag').onclick = () => { if (S.busy || S.mode === 'salon' || S.mode === 'naming') return; initAudio(); startNaming(false); };
-$('again').onclick = () => { initAudio(); if (S.busy || !S.last.length) return; if (S.mode === 'salon') ask(); else say(S.last); };
+$('tag').onclick = () => { if (S.busy || S.mode === 'visit' || S.mode === 'naming') return; initAudio(); startNaming(false); };
+$('again').onclick = () => { initAudio(); if (S.busy || !S.last.length) return; if (S.mode === 'visit') ask(); else say(S.last); };
 ['pointerdown', 'keydown', 'touchend'].forEach(t => window.addEventListener(t, wake, true));
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopSound(); });
 
+// The pool runs on past the edge of the picture, so on a wide tablet the water reaches the side of the screen.
+$('water').setAttribute('d', 'M122 268 q14 -10 28 0' + ' t28 0'.repeat(70) + ' V900 H122 Z');
+
 S.names = loadNames();
 showTitle();
-window.__lm = { S, choose, startVisit, startNaming, showTitle, finale, info, ITEMS, COLORS, NAMES, LINES };   // handle for testing
+window.__lm = { S, ROOMS, ROOM_ORDER, choose, startVisit, startNaming, showTitle, showRooms, finale, info, drawing, variantOf, ITEMS, COLORS, NAMES, LINES, VARIANT };   // handle for testing
 })();
 </script>
 <script>

@@ -2,66 +2,859 @@
   "model": "eleven_v4",
   "format": "mp3_44100_64",
   "voices": {
-    "pony": { "id": "BMRQG4PIovkwKTk46STk", "name": "Ezgi", "role": "the pony: asks for things, reacts, says her names" },
-    "word": { "id": "6GYyziau4Hk8qdg7od5c", "name": "Betül Tuna", "role": "says each object's name clearly when it is touched" }
+    "pony": {
+      "id": "BMRQG4PIovkwKTk46STk",
+      "name": "Ezgi",
+      "role": "the pony: asks for things, reacts, says her names"
+    },
+    "word": {
+      "id": "6GYyziau4Hk8qdg7od5c",
+      "name": "Betül Tuna",
+      "role": "says each object's name clearly when it is touched"
+    }
   },
   "items": [
-    { "id": "sampuan", "tr": "Şampuan", "en": "shampoo" },
-    { "id": "sabun",   "tr": "Sabun",   "en": "soap" },
-    { "id": "su",      "tr": "Su",      "en": "water" },
-    { "id": "havlu",   "tr": "Havlu",   "en": "towel" },
-    { "id": "tarak",   "tr": "Tarak",   "en": "comb" },
-    { "id": "firca",   "tr": "Fırça",   "en": "brush" },
-    { "id": "makas",   "tr": "Makas",   "en": "scissors" },
-    { "id": "fon",     "tr": "Fön",     "en": "hairdryer" },
-    { "id": "toka",    "tr": "Toka",    "en": "hair clip" },
-    { "id": "cicek",   "tr": "Çiçek",   "en": "flower" },
-    { "id": "tac",     "tr": "Taç",     "en": "crown" },
-    { "id": "parfum",  "tr": "Parfüm",  "en": "perfume" },
-    { "id": "ayna",    "tr": "Ayna",    "en": "mirror" }
+    {
+      "id": "sampuan",
+      "tr": "Şampuan",
+      "en": "shampoo",
+      "room": "kuafor"
+    },
+    {
+      "id": "sabun",
+      "tr": "Sabun",
+      "en": "soap",
+      "room": "kuafor"
+    },
+    {
+      "id": "su",
+      "tr": "Su",
+      "en": "water",
+      "room": "kuafor"
+    },
+    {
+      "id": "havlu",
+      "tr": "Havlu",
+      "en": "towel",
+      "room": "kuafor"
+    },
+    {
+      "id": "tarak",
+      "tr": "Tarak",
+      "en": "comb",
+      "room": "kuafor"
+    },
+    {
+      "id": "firca",
+      "tr": "Fırça",
+      "en": "brush",
+      "room": "kuafor"
+    },
+    {
+      "id": "makas",
+      "tr": "Makas",
+      "en": "scissors",
+      "room": "kuafor"
+    },
+    {
+      "id": "fon",
+      "tr": "Fön",
+      "en": "hairdryer",
+      "room": "kuafor"
+    },
+    {
+      "id": "toka",
+      "tr": "Toka",
+      "en": "hair clip",
+      "room": "kuafor"
+    },
+    {
+      "id": "cicek",
+      "tr": "Çiçek",
+      "en": "flower",
+      "room": "kuafor"
+    },
+    {
+      "id": "tac",
+      "tr": "Taç",
+      "en": "crown",
+      "room": "kuafor"
+    },
+    {
+      "id": "parfum",
+      "tr": "Parfüm",
+      "en": "perfume",
+      "room": "kuafor"
+    },
+    {
+      "id": "ayna",
+      "tr": "Ayna",
+      "en": "mirror",
+      "room": "kuafor"
+    },
+    {
+      "id": "etek",
+      "tr": "Etek",
+      "en": "skirt",
+      "room": "butik"
+    },
+    {
+      "id": "ayakkabi",
+      "tr": "Ayakkabı",
+      "en": "shoes",
+      "room": "butik"
+    },
+    {
+      "id": "corap",
+      "tr": "Çorap",
+      "en": "socks",
+      "room": "butik"
+    },
+    {
+      "id": "sapka",
+      "tr": "Şapka",
+      "en": "hat",
+      "room": "butik"
+    },
+    {
+      "id": "kolye",
+      "tr": "Kolye",
+      "en": "necklace",
+      "room": "butik"
+    },
+    {
+      "id": "atki",
+      "tr": "Atkı",
+      "en": "scarf",
+      "room": "butik"
+    },
+    {
+      "id": "canta",
+      "tr": "Çanta",
+      "en": "bag",
+      "room": "butik"
+    },
+    {
+      "id": "gozluk",
+      "tr": "Gözlük",
+      "en": "glasses",
+      "room": "butik"
+    },
+    {
+      "id": "gunes-kremi",
+      "tr": "Güneş kremi",
+      "en": "sunscreen",
+      "room": "havuz"
+    },
+    {
+      "id": "mayo",
+      "tr": "Mayo",
+      "en": "swimsuit",
+      "room": "havuz"
+    },
+    {
+      "id": "bone",
+      "tr": "Bone",
+      "en": "swim cap",
+      "room": "havuz"
+    },
+    {
+      "id": "deniz-gozlugu",
+      "tr": "Deniz gözlüğü",
+      "en": "goggles",
+      "room": "havuz"
+    },
+    {
+      "id": "simit",
+      "tr": "Simit",
+      "en": "swim ring",
+      "room": "havuz"
+    },
+    {
+      "id": "kolluk",
+      "tr": "Kolluk",
+      "en": "arm floats",
+      "room": "havuz"
+    },
+    {
+      "id": "top",
+      "tr": "Top",
+      "en": "ball",
+      "room": "havuz"
+    },
+    {
+      "id": "ordek",
+      "tr": "Ördek",
+      "en": "duck",
+      "room": "havuz"
+    },
+    {
+      "id": "terlik",
+      "tr": "Terlik",
+      "en": "flip-flops",
+      "room": "havuz"
+    },
+    {
+      "id": "kase",
+      "tr": "Kase",
+      "en": "bowl",
+      "room": "pastane"
+    },
+    {
+      "id": "un",
+      "tr": "Un",
+      "en": "flour",
+      "room": "pastane"
+    },
+    {
+      "id": "yumurta",
+      "tr": "Yumurta",
+      "en": "egg",
+      "room": "pastane"
+    },
+    {
+      "id": "sut",
+      "tr": "Süt",
+      "en": "milk",
+      "room": "pastane"
+    },
+    {
+      "id": "seker",
+      "tr": "Şeker",
+      "en": "sugar",
+      "room": "pastane"
+    },
+    {
+      "id": "tereyagi",
+      "tr": "Tereyağı",
+      "en": "butter",
+      "room": "pastane"
+    },
+    {
+      "id": "kasik",
+      "tr": "Kaşık",
+      "en": "spoon",
+      "room": "pastane"
+    },
+    {
+      "id": "firin",
+      "tr": "Fırın",
+      "en": "oven",
+      "room": "pastane"
+    },
+    {
+      "id": "krema",
+      "tr": "Krema",
+      "en": "cream",
+      "room": "pastane"
+    },
+    {
+      "id": "cilek",
+      "tr": "Çilek",
+      "en": "strawberry",
+      "room": "pastane"
+    },
+    {
+      "id": "cikolata",
+      "tr": "Çikolata",
+      "en": "chocolate",
+      "room": "pastane"
+    },
+    {
+      "id": "mum",
+      "tr": "Mum",
+      "en": "candle",
+      "room": "pastane"
+    },
+    {
+      "id": "elma",
+      "tr": "Elma",
+      "en": "apple",
+      "room": "yemek"
+    },
+    {
+      "id": "havuc",
+      "tr": "Havuç",
+      "en": "carrot",
+      "room": "yemek"
+    },
+    {
+      "id": "muz",
+      "tr": "Muz",
+      "en": "banana",
+      "room": "yemek"
+    },
+    {
+      "id": "karpuz",
+      "tr": "Karpuz",
+      "en": "watermelon",
+      "room": "yemek"
+    },
+    {
+      "id": "armut",
+      "tr": "Armut",
+      "en": "pear",
+      "room": "yemek"
+    },
+    {
+      "id": "uzum",
+      "tr": "Üzüm",
+      "en": "grapes",
+      "room": "yemek"
+    },
+    {
+      "id": "ekmek",
+      "tr": "Ekmek",
+      "en": "bread",
+      "room": "yemek"
+    },
+    {
+      "id": "eyer",
+      "tr": "Eyer",
+      "en": "saddle",
+      "room": "gezinti"
+    },
+    {
+      "id": "kask",
+      "tr": "Kask",
+      "en": "helmet",
+      "room": "gezinti"
+    },
+    {
+      "id": "agac",
+      "tr": "Ağaç",
+      "en": "tree",
+      "room": "gezinti"
+    },
+    {
+      "id": "kelebek",
+      "tr": "Kelebek",
+      "en": "butterfly",
+      "room": "gezinti"
+    },
+    {
+      "id": "kus",
+      "tr": "Kuş",
+      "en": "bird",
+      "room": "gezinti"
+    },
+    {
+      "id": "gunes",
+      "tr": "Güneş",
+      "en": "sun",
+      "room": "gezinti"
+    },
+    {
+      "id": "bulut",
+      "tr": "Bulut",
+      "en": "cloud",
+      "room": "gezinti"
+    },
+    {
+      "id": "gokkusagi",
+      "tr": "Gökkuşağı",
+      "en": "rainbow",
+      "room": "gezinti"
+    },
+    {
+      "id": "ev",
+      "tr": "Ev",
+      "en": "house",
+      "room": "gezinti"
+    }
   ],
   "colors": [
-    { "id": "pembe",   "tr": "Pembe",   "en": "pink",   "hex": "#ff5fa8" },
-    { "id": "mavi",    "tr": "Mavi",    "en": "blue",   "hex": "#3d8bff" },
-    { "id": "sari",    "tr": "Sarı",    "en": "yellow", "hex": "#ffc928" },
-    { "id": "mor",     "tr": "Mor",     "en": "purple", "hex": "#9b5de5" },
-    { "id": "kirmizi", "tr": "Kırmızı", "en": "red",    "hex": "#ef3b4d" },
-    { "id": "yesil",   "tr": "Yeşil",   "en": "green",  "hex": "#2fb86b" }
+    {
+      "id": "pembe",
+      "tr": "Pembe",
+      "en": "pink",
+      "hex": "#ff5fa8"
+    },
+    {
+      "id": "mavi",
+      "tr": "Mavi",
+      "en": "blue",
+      "hex": "#3d8bff"
+    },
+    {
+      "id": "sari",
+      "tr": "Sarı",
+      "en": "yellow",
+      "hex": "#ffc928"
+    },
+    {
+      "id": "mor",
+      "tr": "Mor",
+      "en": "purple",
+      "hex": "#9b5de5"
+    },
+    {
+      "id": "kirmizi",
+      "tr": "Kırmızı",
+      "en": "red",
+      "hex": "#ef3b4d"
+    },
+    {
+      "id": "yesil",
+      "tr": "Yeşil",
+      "en": "green",
+      "hex": "#2fb86b"
+    }
   ],
-  "ribbon": { "tr": "kurdele", "en": "ribbon" },
   "names": [
-    { "id": "zooey",  "show": "Zooey",  "tts": "Zui" },
-    { "id": "rosie",  "show": "Rosie",  "tts": "Rozi" },
-    { "id": "pamuk",  "show": "Pamuk",  "tts": "Pamuk",  "en": "cotton" },
-    { "id": "seker",  "show": "Şeker",  "tts": "Şeker",  "en": "sugar" },
-    { "id": "cilek",  "show": "Çilek",  "tts": "Çilek",  "en": "strawberry" },
-    { "id": "bulut",  "show": "Bulut",  "tts": "Bulut",  "en": "cloud" },
-    { "id": "yildiz", "show": "Yıldız", "tts": "Yıldız", "en": "star" },
-    { "id": "fistik", "show": "Fıstık", "tts": "Fıstık", "en": "peanut" }
+    {
+      "id": "zooey",
+      "show": "Zooey",
+      "tts": "Zui"
+    },
+    {
+      "id": "rosie",
+      "show": "Rosie",
+      "tts": "Rozi"
+    },
+    {
+      "id": "pamuk",
+      "show": "Pamuk",
+      "tts": "Pamuk",
+      "en": "cotton"
+    },
+    {
+      "id": "seker",
+      "show": "Şeker",
+      "tts": "Şeker",
+      "en": "sugar"
+    },
+    {
+      "id": "cilek",
+      "show": "Çilek",
+      "tts": "Çilek",
+      "en": "strawberry"
+    },
+    {
+      "id": "bulut",
+      "show": "Bulut",
+      "tts": "Bulut",
+      "en": "cloud"
+    },
+    {
+      "id": "yildiz",
+      "show": "Yıldız",
+      "tts": "Yıldız",
+      "en": "star"
+    },
+    {
+      "id": "fistik",
+      "show": "Fıstık",
+      "tts": "Fıstık",
+      "en": "peanut"
+    }
   ],
   "lines": [
-    { "id": "hello",     "text": "Merhaba Leyla!",                         "tts": "[excited] Merhaba Leyla!",                          "en": "Hello Leyla!" },
-    { "id": "who",       "text": "Benim adım ne? Sen seç!",                "tts": "[curious] Benim adım ne? Sen seç!",                 "en": "What's my name? You choose!" },
-    { "id": "myname",    "text": "Benim adım...",                          "tts": "[excited] Benim adım...",                           "en": "My name is..." },
-    { "id": "funny",     "text": "Çok komik!",                             "tts": "[laughs] Çok komik!",                               "en": "So funny!" },
-    { "id": "lovename",  "text": "Bu adı çok sevdim!",                     "tts": "[excited] Bu adı çok sevdim!",                      "en": "I love this name!" },
-    { "id": "messy",     "text": "Saçım çok dağınık! Yardım eder misin?",  "tts": "[sighs] Saçım çok dağınık! Yardım eder misin?",     "en": "My hair is a mess! Will you help?" },
-    { "id": "lookagain", "text": "Bir daha bak!",                          "tts": "[cheerfully] Bir daha bak!",                        "en": "Look again!" },
-    { "id": "tickle",    "text": "Gıdıklanıyorum!",                        "tts": "[laughs] Gıdıklanıyorum!",                          "en": "That tickles!" },
-    { "id": "praise1",   "text": "Aferin!",                                "tts": "[excited] Aferin!",                                 "en": "Well done!" },
-    { "id": "praise2",   "text": "Harika!",                                "tts": "[excited] Harika!",                                 "en": "Wonderful!" },
-    { "id": "praise3",   "text": "Süper!",                                 "tts": "[excited] Süper!",                                  "en": "Super!" },
-    { "id": "praise4",   "text": "Çok güzel!",                             "tts": "[excited] Çok güzel!",                              "en": "Very nice!" },
-    { "id": "praise5",   "text": "Teşekkür ederim!",                       "tts": "[cheerfully] Teşekkür ederim!",                     "en": "Thank you!" },
-    { "id": "fx_bubbles","text": "Köpük köpük!",                           "tts": "[laughs] Köpük köpük!",                             "en": "Bubbles, bubbles!" },
-    { "id": "fx_water",  "text": "Şırıl şırıl!",                           "tts": "[excited] Şırıl şırıl!",                            "en": "Splish splash!" },
-    { "id": "fx_towel",  "text": "Oh, yumuşacık!",                         "tts": "[sighs] Oh, yumuşacık!",                            "en": "Ooh, so soft!" },
-    { "id": "fx_comb",   "text": "Çok güzel taradın!",                     "tts": "[excited] Çok güzel taradın!",                      "en": "You combed it so nicely!" },
-    { "id": "fx_snip",   "text": "Kırt kırt kırt!",                        "tts": "[mischievously] Kırt kırt kırt!",                   "en": "Snip snip snip!" },
-    { "id": "fx_dryer",  "text": "Vuuu! Sıcacık!",                         "tts": "[excited] Vuuu! Sıcacık!",                          "en": "Whoosh! So warm!" },
-    { "id": "fx_wear",   "text": "Bana çok yakıştı!",                      "tts": "[excited] Bana çok yakıştı!",                       "en": "It suits me so well!" },
-    { "id": "fx_perfume","text": "Mis gibi kokuyorum!",                    "tts": "[excited] Mis gibi kokuyorum!",                     "en": "I smell lovely!" },
-    { "id": "done",      "text": "Çok güzel oldum! Teşekkür ederim, Leyla!", "tts": "[excited] Çok güzel oldum! Teşekkür ederim, Leyla!", "en": "I look so pretty! Thank you, Leyla!" },
-    { "id": "again",     "text": "Tekrar oynayalım mı?",                   "tts": "[curious] Tekrar oynayalım mı?",                    "en": "Shall we play again?" }
+    {
+      "id": "hello",
+      "text": "Merhaba Leyla!",
+      "tts": "[excited] Merhaba Leyla!",
+      "en": "Hello Leyla!"
+    },
+    {
+      "id": "who",
+      "text": "Benim adım ne? Sen seç!",
+      "tts": "[curious] Benim adım ne? Sen seç!",
+      "en": "What's my name? You choose!"
+    },
+    {
+      "id": "myname",
+      "text": "Benim adım...",
+      "tts": "[excited] Benim adım...",
+      "en": "My name is..."
+    },
+    {
+      "id": "funny",
+      "text": "Çok komik!",
+      "tts": "[laughs] Çok komik!",
+      "en": "So funny!"
+    },
+    {
+      "id": "lovename",
+      "text": "Bu adı çok sevdim!",
+      "tts": "[excited] Bu adı çok sevdim!",
+      "en": "I love this name!"
+    },
+    {
+      "id": "messy",
+      "text": "Saçım çok dağınık! Yardım eder misin?",
+      "tts": "[sighs] Saçım çok dağınık! Yardım eder misin?",
+      "en": "My hair is a mess! Will you help?"
+    },
+    {
+      "id": "lookagain",
+      "text": "Bir daha bak!",
+      "tts": "[cheerfully] Bir daha bak!",
+      "en": "Look again!"
+    },
+    {
+      "id": "tickle",
+      "text": "Gıdıklanıyorum!",
+      "tts": "[laughs] Gıdıklanıyorum!",
+      "en": "That tickles!"
+    },
+    {
+      "id": "praise1",
+      "text": "Aferin!",
+      "tts": "[excited] Aferin!",
+      "en": "Well done!"
+    },
+    {
+      "id": "praise2",
+      "text": "Harika!",
+      "tts": "[excited] Harika!",
+      "en": "Wonderful!"
+    },
+    {
+      "id": "praise3",
+      "text": "Süper!",
+      "tts": "[excited] Süper!",
+      "en": "Super!"
+    },
+    {
+      "id": "praise4",
+      "text": "Çok güzel!",
+      "tts": "[excited] Çok güzel!",
+      "en": "Very nice!"
+    },
+    {
+      "id": "praise5",
+      "text": "Teşekkür ederim!",
+      "tts": "[cheerfully] Teşekkür ederim!",
+      "en": "Thank you!"
+    },
+    {
+      "id": "fx_bubbles",
+      "text": "Köpük köpük!",
+      "tts": "[laughs] Köpük köpük!",
+      "en": "Bubbles, bubbles!"
+    },
+    {
+      "id": "fx_water",
+      "text": "Şırıl şırıl!",
+      "tts": "[excited] Şırıl şırıl!",
+      "en": "Splish splash!"
+    },
+    {
+      "id": "fx_towel",
+      "text": "Oh, yumuşacık!",
+      "tts": "[sighs] Oh, yumuşacık!",
+      "en": "Ooh, so soft!"
+    },
+    {
+      "id": "fx_comb",
+      "text": "Çok güzel taradın!",
+      "tts": "[excited] Çok güzel taradın!",
+      "en": "You combed it so nicely!"
+    },
+    {
+      "id": "fx_snip",
+      "text": "Kırt kırt kırt!",
+      "tts": "[mischievously] Kırt kırt kırt!",
+      "en": "Snip snip snip!"
+    },
+    {
+      "id": "fx_dryer",
+      "text": "Vuuu! Sıcacık!",
+      "tts": "[excited] Vuuu! Sıcacık!",
+      "en": "Whoosh! So warm!"
+    },
+    {
+      "id": "fx_wear",
+      "text": "Bana çok yakıştı!",
+      "tts": "[excited] Bana çok yakıştı!",
+      "en": "It suits me so well!"
+    },
+    {
+      "id": "fx_perfume",
+      "text": "Mis gibi kokuyorum!",
+      "tts": "[excited] Mis gibi kokuyorum!",
+      "en": "I smell lovely!"
+    },
+    {
+      "id": "done",
+      "text": "Çok güzel oldum! Teşekkür ederim, Leyla!",
+      "tts": "[excited] Çok güzel oldum! Teşekkür ederim, Leyla!",
+      "en": "I look so pretty! Thank you, Leyla!"
+    },
+    {
+      "id": "again",
+      "text": "Tekrar oynayalım mı?",
+      "tts": "[curious] Tekrar oynayalım mı?",
+      "en": "Shall we play again?"
+    },
+    {
+      "id": "where",
+      "text": "Nereye gidelim?",
+      "tts": "[curious] Nereye gidelim?",
+      "en": "Where shall we go?"
+    },
+    {
+      "id": "start_butik",
+      "text": "Bugün ne giysem? Yardım eder misin?",
+      "tts": "[curious] Bugün ne giysem? Yardım eder misin?",
+      "en": "What shall I wear today? Will you help?"
+    },
+    {
+      "id": "start_havuz",
+      "text": "Yüzmeye gidelim! Önce hazırlanalım!",
+      "tts": "[excited] Yüzmeye gidelim! Önce hazırlanalım!",
+      "en": "Let's go swimming! First let's get ready!"
+    },
+    {
+      "id": "start_pastane",
+      "text": "Pasta yapalım! Yardım eder misin?",
+      "tts": "[excited] Pasta yapalım! Yardım eder misin?",
+      "en": "Let's make a cake! Will you help?"
+    },
+    {
+      "id": "fx_chic",
+      "text": "Çok şık oldum!",
+      "tts": "[excited] Çok şık oldum!",
+      "en": "I look so smart!"
+    },
+    {
+      "id": "fx_love",
+      "text": "Bayıldım!",
+      "tts": "[excited] Bayıldım!",
+      "en": "I love it!"
+    },
+    {
+      "id": "fx_sun",
+      "text": "Güneş kremi sürdük!",
+      "tts": "[cheerfully] Güneş kremi sürdük!",
+      "en": "Sunscreen is on!"
+    },
+    {
+      "id": "fx_float",
+      "text": "Artık batmam!",
+      "tts": "[excited] Artık batmam!",
+      "en": "Now I won't sink!"
+    },
+    {
+      "id": "fx_splash",
+      "text": "Cup! Su çok güzel!",
+      "tts": "[laughs] Cup! Su çok güzel!",
+      "en": "Splash! The water is lovely!"
+    },
+    {
+      "id": "fx_ball",
+      "text": "Top oynayalım!",
+      "tts": "[excited] Top oynayalım!",
+      "en": "Let's play ball!"
+    },
+    {
+      "id": "fx_duck",
+      "text": "Vak vak vak!",
+      "tts": "[laughs] Vak vak vak!",
+      "en": "Quack quack quack!"
+    },
+    {
+      "id": "fx_flip",
+      "text": "Şıp şıp şıp!",
+      "tts": "[mischievously] Şıp şıp şıp!",
+      "en": "Flip flop flip!"
+    },
+    {
+      "id": "done_havuz",
+      "text": "Çok eğlendim! Teşekkür ederim, Leyla!",
+      "tts": "[excited] Çok eğlendim! Teşekkür ederim, Leyla!",
+      "en": "That was so much fun! Thank you, Leyla!"
+    },
+    {
+      "id": "fx_bowl",
+      "text": "Kase hazır!",
+      "tts": "[cheerfully] Kase hazır!",
+      "en": "The bowl is ready!"
+    },
+    {
+      "id": "fx_flour",
+      "text": "Puf! Her yer un oldu!",
+      "tts": "[laughs] Puf! Her yer un oldu!",
+      "en": "Poof! Flour everywhere!"
+    },
+    {
+      "id": "fx_egg",
+      "text": "Çat! Yumurta kırıldı!",
+      "tts": "[excited] Çat! Yumurta kırıldı!",
+      "en": "Crack! The egg broke!"
+    },
+    {
+      "id": "fx_milk",
+      "text": "Lık lık lık!",
+      "tts": "[mischievously] Lık lık lık!",
+      "en": "Glug glug glug!"
+    },
+    {
+      "id": "fx_sweet",
+      "text": "Mmm, tatlı tatlı!",
+      "tts": "[excited] Mmm, tatlı tatlı!",
+      "en": "Mmm, sweet!"
+    },
+    {
+      "id": "fx_butter",
+      "text": "Yumuşacık tereyağı!",
+      "tts": "[cheerfully] Yumuşacık tereyağı!",
+      "en": "Soft butter!"
+    },
+    {
+      "id": "fx_stir",
+      "text": "Karıştır, karıştır!",
+      "tts": "[excited] Karıştır, karıştır!",
+      "en": "Stir, stir!"
+    },
+    {
+      "id": "fx_oven",
+      "text": "Fırında pişiyor... Ding! Pasta pişti!",
+      "tts": "[excited] Fırında pişiyor... Ding! Pasta pişti!",
+      "en": "It's baking... Ding! The cake is done!"
+    },
+    {
+      "id": "fx_frost",
+      "text": "Mmm, krema!",
+      "tts": "[excited] Mmm, krema!",
+      "en": "Mmm, cream!"
+    },
+    {
+      "id": "fx_yum",
+      "text": "Çok lezzetli görünüyor!",
+      "tts": "[excited] Çok lezzetli görünüyor!",
+      "en": "It looks delicious!"
+    },
+    {
+      "id": "done_pastane",
+      "text": "Pasta hazır! Afiyet olsun, Leyla!",
+      "tts": "[excited] Pasta hazır! Afiyet olsun, Leyla!",
+      "en": "The cake is ready! Enjoy, Leyla!"
+    },
+    {
+      "id": "start_yemek",
+      "text": "Karnım acıktı! Bana yemek verir misin?",
+      "tts": "[sighs] Karnım acıktı! Bana yemek verir misin?",
+      "en": "I'm hungry! Will you feed me?"
+    },
+    {
+      "id": "fx_chomp",
+      "text": "Ham ham ham!",
+      "tts": "[excited] Ham ham ham!",
+      "en": "Nom nom nom!"
+    },
+    {
+      "id": "fx_tasty",
+      "text": "Mmm, çok lezzetli!",
+      "tts": "[excited] Mmm, çok lezzetli!",
+      "en": "Mmm, so tasty!"
+    },
+    {
+      "id": "fx_crunch",
+      "text": "Kıtır kıtır!",
+      "tts": "[mischievously] Kıtır kıtır!",
+      "en": "Crunch crunch!"
+    },
+    {
+      "id": "fx_more",
+      "text": "Bir tane daha istiyorum!",
+      "tts": "[excited] Bir tane daha istiyorum!",
+      "en": "I want one more!"
+    },
+    {
+      "id": "done_yemek",
+      "text": "Doydum! Teşekkür ederim, Leyla!",
+      "tts": "[excited] Doydum! Teşekkür ederim, Leyla!",
+      "en": "I'm full! Thank you, Leyla!"
+    },
+    {
+      "id": "start_gezinti",
+      "text": "Gezmeye gidelim! Önce beni hazırla!",
+      "tts": "[excited] Gezmeye gidelim! Önce beni hazırla!",
+      "en": "Let's go for a ride! Get me ready first!"
+    },
+    {
+      "id": "fx_saddle",
+      "text": "Eyer tamam! Hadi bin!",
+      "tts": "[excited] Eyer tamam! Hadi bin!",
+      "en": "Saddle on! Hop on!"
+    },
+    {
+      "id": "fx_helmet",
+      "text": "Kask tamam! Güvendeyiz!",
+      "tts": "[cheerfully] Kask tamam! Güvendeyiz!",
+      "en": "Helmet on! We're safe!"
+    },
+    {
+      "id": "fx_ride",
+      "text": "Deh! Dıgıdık, dıgıdık!",
+      "tts": "[excited] Deh! Dıgıdık, dıgıdık!",
+      "en": "Giddy-up! Clip clop, clip clop!"
+    },
+    {
+      "id": "fx_look",
+      "text": "Bak, ne güzel!",
+      "tts": "[excited] Bak, ne güzel!",
+      "en": "Look, how lovely!"
+    },
+    {
+      "id": "fx_wow",
+      "text": "Vay canına!",
+      "tts": "[excited] Vay canına!",
+      "en": "Wow!"
+    },
+    {
+      "id": "done_gezinti",
+      "text": "Çüş! Geldik! Çok güzel bir gezinti oldu, Leyla!",
+      "tts": "[excited] Çüş! Geldik! Çok güzel bir gezinti oldu, Leyla!",
+      "en": "Whoa! We are here! What a lovely ride, Leyla!"
+    }
+  ],
+  "variants": [
+    {
+      "id": "kurdele",
+      "tr": "kurdele",
+      "en": "ribbon",
+      "room": "kuafor"
+    },
+    {
+      "id": "elbise",
+      "tr": "elbise",
+      "en": "dress",
+      "room": "butik"
+    }
+  ],
+  "rooms": [
+    {
+      "id": "kuafor",
+      "tr": "Kuaför",
+      "en": "hair salon"
+    },
+    {
+      "id": "butik",
+      "tr": "Butik",
+      "en": "dress-up"
+    },
+    {
+      "id": "havuz",
+      "tr": "Havuz",
+      "en": "pool"
+    },
+    {
+      "id": "pastane",
+      "tr": "Pastane",
+      "en": "bakery"
+    },
+    {
+      "id": "yemek",
+      "tr": "Yemek",
+      "en": "feeding"
+    },
+    {
+      "id": "gezinti",
+      "tr": "Gezinti",
+      "en": "riding"
+    }
   ]
 }
