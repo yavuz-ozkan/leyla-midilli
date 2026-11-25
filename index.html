@@ -1,0 +1,500 @@
+<title>Leyla'nın Midillisi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@700&display=swap">
+<style>
+/* Layout: one screen, three bands. The pony's speech bubble on top, the pony in her salon in the middle,
+   a shelf of big things to tap at the bottom. Nothing to read: every tap speaks Turkish. */
+:root{
+  --wall:#f4e6ff; --wall-2:#ead4fb; --floor:#ffd3e6; --paper:#fffaf3; --ink:#3b1f4a; --soft:#8a6f96;
+  --berry:#e8418a; --mint:#7fd8c3; --sun:#ffd166; --coat:#fff6fb; --coat-far:#f0d9ee; --hair:#ff7fbf; --hair-wet:#d95a9c; --hoof:#c9a7ff;
+  --font:'Baloo 2','Trebuchet MS','Segoe UI',sans-serif;
+  --font-small:'Nunito','Segoe UI',sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--font);font-size:16px;overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulation;background:none}
+button:focus-visible{outline:4px solid var(--berry);outline-offset:3px}
+
+#app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:8px;padding-block:10px 14px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:linear-gradient(to top,var(--floor) 0 27%,transparent 27%),repeating-linear-gradient(90deg,var(--wall) 0 44px,var(--wall-2) 44px 88px)}
+
+/* the speech bubble */
+#top{display:flex;align-items:center;gap:10px;min-width:0}
+#bubble{flex:1;min-width:0;display:flex;align-items:center;gap:12px;background:var(--paper);border:4px solid var(--ink);border-radius:26px;
+  padding:6px 16px 6px 8px;box-shadow:0 5px 0 var(--ink);min-height:68px}
+#again{flex:none;width:54px;height:54px;border-radius:50%;background:var(--sun);border:4px solid var(--ink);display:grid;place-items:center}
+#again svg{width:28px;height:28px}
+#again:active{transform:translateY(2px)}
+#words{min-width:0;display:flex;flex-direction:column;line-height:1.05}
+#word{font-weight:800;font-size:clamp(1.5rem,5.2vw,2.7rem);text-wrap:balance;overflow-wrap:anywhere}
+#gloss{font-family:var(--font-small);font-weight:700;font-size:.82rem;color:var(--soft);letter-spacing:.02em}
+#steps{flex:none;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:34%}
+#steps i{width:14px;height:14px;border-radius:50%;border:3px solid var(--ink);background:var(--paper)}
+#steps i.done{background:var(--berry)}
+#steps i.now{background:var(--sun)}
+
+/* the salon */
+#stage{position:relative;min-height:0;overflow:hidden}
+#pony{position:absolute;inset:0;width:100%;height:100%;display:block}   /* fills the middle band and never spills onto the shelf */
+#tag{position:absolute;left:0;top:0;max-width:60%;background:var(--berry);color:#fff;font-weight:800;font-size:clamp(.95rem,2.6vw,1.3rem);
+  border:4px solid var(--ink);border-radius:999px;padding:2px 16px;box-shadow:0 4px 0 var(--ink);overflow-wrap:anywhere;text-align:left}
+#confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#confetti i{position:absolute;top:-20px;width:12px;height:18px;border-radius:3px;animation:confetti 2.6s linear forwards}
+
+.ol{fill:var(--ink);stroke:var(--ink);stroke-width:9;stroke-linejoin:round}
+.fl{fill:var(--coat)}
+.far rect{fill:var(--coat-far);stroke:var(--ink);stroke-width:4.5}
+.hoof{fill:var(--hoof);stroke:var(--ink);stroke-width:4}
+.hair{fill:var(--hair);stroke:var(--ink);stroke-width:4.5;stroke-linejoin:round}
+.hair.wet{fill:var(--hair-wet)}
+.strand{fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;opacity:.75}
+.sud{fill:#fff;stroke:#9fd8ff;stroke-width:2.5}
+.line{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.acc{stroke:var(--ink);stroke-width:3.5;stroke-linejoin:round}
+.off{display:none}
+#pony [data-m]{display:none}
+#pony[data-mane="messy"] [data-m~="messy"],#pony[data-mane="wet"] [data-m~="wet"],#pony[data-mane="soapy"] [data-m~="soapy"],
+#pony[data-mane="combed"] [data-m~="combed"],#pony[data-mane="fluffy"] [data-m~="fluffy"]{display:inline}
+#bounce,#eye,#suds circle,#fx *{transform-box:fill-box;transform-origin:center}
+#bounce{animation:bob 2.6s ease-in-out infinite}
+#bounce.jump{animation:jump .5s ease-out}
+#bounce.twirl{animation:twirl 1.1s ease-in-out}
+#eye{animation:blink 4.2s infinite}
+#suds circle{animation:sud 1.6s ease-in-out infinite alternate}
+#suds circle:nth-child(2n){animation-delay:-.7s}
+.fx-bub{animation:floatup 1.5s ease-out forwards}
+.fx-drop{animation:fall .9s ease-in forwards}
+.fx-spark{animation:pop .9s ease-out forwards}
+.fx-snip{animation:snip 1.2s ease-in forwards}
+
+/* the shelf */
+#shelf{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:clamp(10px,3vw,26px);min-height:clamp(104px,24vmin,180px);
+  background:var(--paper);border:4px solid var(--ink);border-radius:28px;padding:10px 12px;box-shadow:0 5px 0 var(--ink)}
+.pick{width:clamp(84px,20vmin,150px);aspect-ratio:1;background:#fff;border:4px solid var(--ink);border-radius:28px;box-shadow:0 6px 0 var(--ink);
+  display:grid;place-items:center;padding:8px;transition:transform .12s}
+.pick svg{width:100%;height:100%;pointer-events:none}
+.pick:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+.pick.right{background:#d9f7e8}
+.pick.wobble{animation:wobble .5s}
+.pick.hint{background:#fff3c4;animation:hint 1s ease-in-out infinite}
+.pick:disabled{cursor:default}
+.go{width:clamp(96px,22vmin,150px);aspect-ratio:1;border-radius:50%;background:var(--berry);border:5px solid var(--ink);box-shadow:0 7px 0 var(--ink);display:grid;place-items:center}
+.go svg{width:52%;height:52%}
+.go:active{transform:translateY(5px);box-shadow:0 2px 0 var(--ink)}
+.go:disabled{background:#d9cbe0;box-shadow:0 3px 0 var(--ink);cursor:default}
+.chip{display:flex;align-items:center;gap:6px;background:#fff;border:4px solid var(--ink);border-radius:999px;padding:4px 16px 4px 10px;box-shadow:0 5px 0 var(--ink);
+  font-weight:800;font-size:clamp(1rem,3vw,1.35rem);min-height:52px}
+.chip span{font-size:1.5em;line-height:1}
+.chip:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+.chip.on{background:var(--berry);color:#fff}
+.ghost{position:fixed;z-index:20;pointer-events:none}
+
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes jump{0%,100%{transform:translateY(0)}40%{transform:translateY(-30px) rotate(-3deg)}70%{transform:translateY(-6px)}}
+@keyframes twirl{0%,100%{transform:scaleX(1)}25%{transform:scaleX(-1) translateY(-22px)}50%{transform:scaleX(1)}75%{transform:scaleX(-1) translateY(-22px)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes sud{from{transform:translateY(0) scale(1)}to{transform:translateY(-5px) scale(1.12)}}
+@keyframes floatup{from{transform:translateY(0) scale(.5);opacity:1}to{transform:translateY(-110px) scale(1.2);opacity:0}}
+@keyframes fall{from{transform:translateY(-40px);opacity:1}to{transform:translateY(130px);opacity:0}}
+@keyframes pop{0%{transform:scale(0) rotate(0);opacity:1}60%{transform:scale(1.2) rotate(40deg);opacity:1}100%{transform:scale(.6) rotate(70deg);opacity:0}}
+@keyframes snip{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(170px) rotate(260deg);opacity:0}}
+@keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}75%{transform:rotate(9deg)}}
+@keyframes hint{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes confetti{to{transform:translateY(110vh) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){#bounce,#eye,#suds circle,.pick.hint{animation:none}}
+</style>
+
+<div id="app">
+  <div id="top">
+    <div id="bubble">
+      <button id="again" aria-label="Tekrar söyle">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 12h6l8-7v22l-8-7H4z" fill="#3b1f4a"/><path d="M22 11q4 5 0 10M25.5 7q7 9 0 18" fill="none" stroke="#3b1f4a" stroke-width="3" stroke-linecap="round"/></svg>
+      </button>
+      <div id="words"><span id="word">Leyla'nın Midillisi</span><span id="gloss">Leyla's pony</span></div>
+    </div>
+    <div id="steps" aria-hidden="true"></div>
+  </div>
+
+  <div id="stage">
+    <svg id="pony" viewBox="0 0 420 380" data-mane="combed" role="img" aria-label="Midilli">
+      <defs>
+        <g id="bodyshape">
+          <rect x="104" y="262" width="28" height="86" rx="13"/><rect x="250" y="262" width="28" height="86" rx="13"/>
+          <ellipse cx="188" cy="226" rx="100" ry="62"/>
+          <path d="M236 192 Q246 130 286 100 L328 150 Q298 186 278 250 Z"/>
+        </g>
+        <g id="headshape">
+          <ellipse cx="306" cy="114" rx="50" ry="43"/><ellipse cx="346" cy="134" rx="31" ry="25"/>
+          <path d="M283 84 L290 38 L316 76 Z"/>
+        </g>
+      </defs>
+      <ellipse cx="190" cy="352" rx="132" ry="13" fill="#3b1f4a" opacity=".16"/>
+      <g id="bounce">
+        <path class="hair" data-m="messy wet soapy" d="M98 206 L54 196 L72 214 L30 222 L60 238 L24 264 L58 266 L34 302 L70 286 L74 314 L92 270 Q106 246 104 224 Z"/>
+        <path class="hair" data-m="combed fluffy" d="M100 204 C40 194 20 252 44 320 C72 314 86 284 90 262 C100 248 108 236 106 222 Z"/>
+        <g class="far"><rect x="136" y="258" width="26" height="88" rx="12"/><rect x="220" y="258" width="26" height="88" rx="12"/></g>
+        <use href="#bodyshape" class="ol"/><use href="#bodyshape" class="fl"/>
+        <rect class="hoof" x="104" y="332" width="28" height="17" rx="7"/><rect class="hoof" x="250" y="332" width="28" height="17" rx="7"/>
+
+        <path class="hair" data-m="messy" d="M290 70 L262 54 L270 80 L238 72 L254 98 L222 100 L240 122 L208 130 L230 146 L198 162 L224 168 L204 194 L238 194 Q248 140 292 100 Z"/>
+        <path class="hair wet" data-m="wet soapy" d="M292 68 C254 74 224 124 216 202 C228 214 242 204 244 188 C252 142 268 114 292 98 Z"/>
+        <g data-m="combed">
+          <path class="hair" d="M292 66 C250 64 216 112 206 190 C220 204 236 198 240 186 C248 142 266 114 292 98 Z"/>
+          <path class="strand" d="M268 84 C246 104 232 138 226 176"/><path class="strand" d="M280 76 C262 92 248 112 240 136"/>
+        </g>
+        <g data-m="fluffy">
+          <circle class="hair" cx="220" cy="172" r="23"/><circle class="hair" cx="230" cy="142" r="25"/><circle class="hair" cx="244" cy="114" r="25"/>
+          <circle class="hair" cx="262" cy="90" r="24"/><circle class="hair" cx="284" cy="72" r="22"/>
+        </g>
+        <g id="suds" data-m="soapy">
+          <circle class="sud" cx="232" cy="150" r="13"/><circle class="sud" cx="250" cy="118" r="16"/><circle class="sud" cx="270" cy="92" r="12"/>
+          <circle class="sud" cx="222" cy="180" r="10"/><circle class="sud" cx="246" cy="146" r="8"/><circle class="sud" cx="288" cy="74" r="10"/>
+        </g>
+
+        <use href="#headshape" class="ol"/><use href="#headshape" class="fl"/>
+        <path d="M290 76 L293 52 L308 74 Z" fill="#ffb3d1"/>
+        <circle cx="300" cy="140" r="11" fill="#ff9ec4" opacity=".55"/>
+        <g id="eye"><ellipse cx="322" cy="108" rx="10" ry="12" fill="#3b1f4a"/><circle cx="326" cy="103" r="4" fill="#fff"/><circle cx="319" cy="113" r="2" fill="#fff"/></g>
+        <path class="line" d="M309 96 l-6 -5M314 92 l-3 -7" stroke-width="3"/>
+        <ellipse cx="360" cy="128" rx="3" ry="4.5" fill="#3b1f4a"/>
+        <path class="line" d="M338 146 q11 9 24 2"/>
+
+        <path class="hair" data-m="messy" d="M292 78 L300 52 L309 74 L322 50 L325 78 L344 66 L337 98 C325 89 310 86 298 93 Z"/>
+        <path class="hair" data-m="combed fluffy" d="M291 76 C306 58 334 68 339 98 C327 90 312 86 298 93 Z"/>
+        <path class="hair wet" data-m="wet soapy" d="M291 78 C306 66 330 74 336 104 C326 94 312 88 298 94 Z"/>
+
+        <g id="acc-bow" class="off" style="fill:var(--bow,#ff5fa8)">
+          <path class="acc" d="M258 90 L230 72 Q222 90 230 108 Z"/><path class="acc" d="M258 90 L286 72 Q294 90 286 108 Z"/>
+          <path class="acc" d="M254 94 L246 120 L257 112 L261 98 Z"/><circle class="acc" cx="258" cy="90" r="9"/>
+        </g>
+        <g id="acc-cicek" class="off">
+          <g fill="#ff8fc7"><circle class="acc" cx="278" cy="50" r="9"/><circle class="acc" cx="291" cy="59" r="9"/><circle class="acc" cx="286" cy="74" r="9"/><circle class="acc" cx="270" cy="74" r="9"/><circle class="acc" cx="265" cy="59" r="9"/></g>
+          <circle class="acc" cx="278" cy="63" r="8" fill="#ffc928"/>
+        </g>
+        <g id="acc-tac" class="off" transform="rotate(12 314 60)">
+          <path class="acc" d="M290 74 L286 42 L301 58 L314 34 L327 58 L342 42 L338 74 Z" fill="#ffc928"/>
+          <circle cx="314" cy="62" r="5" fill="#ef3b4d"/><circle cx="299" cy="65" r="3.5" fill="#3d8bff"/><circle cx="329" cy="65" r="3.5" fill="#2fb86b"/>
+        </g>
+        <g id="acc-toka" class="off">
+          <path class="acc" d="M330 62 l5.5 11 12 1.8 -8.7 8.5 2 12 -10.8 -5.7 -10.8 5.7 2 -12 -8.7 -8.5 12 -1.8z" fill="#7fd8c3"/>
+        </g>
+        <rect id="headspot" x="240" y="56" width="90" height="90" fill="none"/>
+      </g>
+      <g id="fx"></g>
+    </svg>
+    <button id="tag" hidden></button>
+    <div id="confetti"></div>
+  </div>
+
+  <div id="shelf"></div>
+</div>
+
+<!-- Every recorded voice clip in one file (made by tools/make-audio.mjs). The game still runs without it, silently. -->
+<script src="audio-pack.js"></script>
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id);
+const PACK = window.LM_AUDIO || null;
+
+/* =====================================================================
+   WORDS: everything Baba might want to change lives up here.
+   The same lists are in audio/lines.json, which the voice script reads.
+   ===================================================================== */
+const ITEMS = [
+  { id: 'sampuan', tr: 'Şampuan', en: 'shampoo' }, { id: 'sabun', tr: 'Sabun', en: 'soap' }, { id: 'su', tr: 'Su', en: 'water' },
+  { id: 'havlu', tr: 'Havlu', en: 'towel' }, { id: 'tarak', tr: 'Tarak', en: 'comb' }, { id: 'firca', tr: 'Fırça', en: 'brush' },
+  { id: 'makas', tr: 'Makas', en: 'scissors' }, { id: 'fon', tr: 'Fön', en: 'hairdryer' }, { id: 'toka', tr: 'Toka', en: 'hair clip' },
+  { id: 'cicek', tr: 'Çiçek', en: 'flower' }, { id: 'tac', tr: 'Taç', en: 'crown' }, { id: 'parfum', tr: 'Parfüm', en: 'perfume' },
+  { id: 'ayna', tr: 'Ayna', en: 'mirror' },
+];
+const COLORS = [
+  { id: 'pembe', tr: 'Pembe', en: 'pink', hex: '#ff5fa8' }, { id: 'mavi', tr: 'Mavi', en: 'blue', hex: '#3d8bff' }, { id: 'sari', tr: 'Sarı', en: 'yellow', hex: '#ffc928' },
+  { id: 'mor', tr: 'Mor', en: 'purple', hex: '#9b5de5' }, { id: 'kirmizi', tr: 'Kırmızı', en: 'red', hex: '#ef3b4d' }, { id: 'yesil', tr: 'Yeşil', en: 'green', hex: '#2fb86b' },
+];
+// The names Leyla can give the pony. She picks up to three and the pony says them all in a row.
+const NAMES = [
+  { id: 'zooey', show: 'Zooey', icon: '💜' }, { id: 'rosie', show: 'Rosie', icon: '🌹' }, { id: 'pamuk', show: 'Pamuk', icon: '🤍' }, { id: 'seker', show: 'Şeker', icon: '🍬' },
+  { id: 'cilek', show: 'Çilek', icon: '🍓' }, { id: 'bulut', show: 'Bulut', icon: '☁️' }, { id: 'yildiz', show: 'Yıldız', icon: '⭐' }, { id: 'fistik', show: 'Fıstık', icon: '🥜' },
+];
+const MAX_NAMES = 3;
+const LINES = {
+  hello: ['Merhaba Leyla!', 'Hello Leyla!'], who: ['Benim adım ne? Sen seç!', "What's my name? You choose!"], myname: ['Benim adım...', 'My name is...'],
+  funny: ['Çok komik!', 'So funny!'], lovename: ['Bu adı çok sevdim!', 'I love this name!'], messy: ['Saçım çok dağınık! Yardım eder misin?', 'My hair is a mess! Will you help?'],
+  lookagain: ['Bir daha bak!', 'Look again!'], tickle: ['Gıdıklanıyorum!', 'That tickles!'],
+  praise1: ['Aferin!', 'Well done!'], praise2: ['Harika!', 'Wonderful!'], praise3: ['Süper!', 'Super!'], praise4: ['Çok güzel!', 'Very nice!'], praise5: ['Teşekkür ederim!', 'Thank you!'],
+  fx_bubbles: ['Köpük köpük!', 'Bubbles, bubbles!'], fx_water: ['Şırıl şırıl!', 'Splish splash!'], fx_towel: ['Oh, yumuşacık!', 'Ooh, so soft!'], fx_comb: ['Çok güzel taradın!', 'You combed it so nicely!'],
+  fx_snip: ['Kırt kırt kırt!', 'Snip snip snip!'], fx_dryer: ['Vuuu! Sıcacık!', 'Whoosh! So warm!'], fx_wear: ['Bana çok yakıştı!', 'It suits me so well!'], fx_perfume: ['Mis gibi kokuyorum!', 'I smell lovely!'],
+  done: ['Çok güzel oldum! Teşekkür ederim, Leyla!', 'I look so pretty! Thank you, Leyla!'], again: ['Tekrar oynayalım mı?', 'Shall we play again?'],
+};
+// What each thing does to the pony: [how her mane looks after, the little effect, what she says].
+const EFFECT = {
+  sampuan: ['soapy', 'bubbles', 'fx_bubbles'], sabun: ['soapy', 'bubbles', 'fx_bubbles'], su: ['wet', 'drops', 'fx_water'], havlu: ['messy', 'spark', 'fx_towel'],
+  tarak: ['combed', 'spark', 'fx_comb'], firca: ['combed', 'spark', 'fx_comb'], makas: [null, 'snip', 'fx_snip'], fon: ['fluffy', 'spark', 'fx_dryer'], parfum: [null, 'spark', 'fx_perfume'],
+};
+// Things too alike to be offered as each other's wrong choice.
+const TWIN = { sampuan: 'sabun', sabun: 'sampuan', tarak: 'firca', firca: 'tarak' };
+const PRAISE = ['praise1', 'praise2', 'praise3', 'praise4', 'praise5'];
+
+const itemOf = {}; ITEMS.forEach(i => { itemOf[i.id] = i; });
+const colorOf = {}; COLORS.forEach(c => { colorOf[c.id] = c; });
+const nameOf = {}; NAMES.forEach(n => { nameOf[n.id] = n; });
+const info = id => { if (id.indexOf('kurdele-') === 0) { const c = colorOf[id.slice(8)]; return { tr: c.tr + ' kurdele', en: c.en + ' ribbon', hex: c.hex }; } return itemOf[id]; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* =====================================================================
+   Pictures of the things, drawn here so they look the same on every tablet
+   ===================================================================== */
+const K = 'stroke="#3b1f4a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+function drawing(id) {
+  const c = id.indexOf('kurdele-') === 0 ? colorOf[id.slice(8)].hex : null;
+  const art = {
+    sampuan: `<rect x="19" y="22" width="26" height="36" rx="8" fill="#39c6b5" ${K}/><rect x="26" y="9" width="12" height="13" rx="3" fill="#ffd166" ${K}/><path d="M32 31q-8 10 0 15q8-5 0-15z" fill="#fff"/>`,
+    sabun: `<rect x="8" y="28" width="42" height="26" rx="11" fill="#ff9ec4" ${K}/><circle cx="46" cy="18" r="8" fill="#fff" stroke="#7cc8ff" stroke-width="3"/><circle cx="56" cy="32" r="4.5" fill="#fff" stroke="#7cc8ff" stroke-width="3"/><circle cx="33" cy="12" r="4.5" fill="#fff" stroke="#7cc8ff" stroke-width="3"/>`,
+    su: `<path d="M32 5C20 23 12 33 12 42a20 20 0 0 0 40 0C52 33 44 23 32 5z" fill="#4db8ff" ${K}/><path d="M21 42a11 11 0 0 0 9 11" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
+    havlu: `<rect x="9" y="14" width="46" height="36" rx="6" fill="#ffd166" ${K}/><path d="M11 25h42M11 39h42" stroke="#fff" stroke-width="5"/><path d="M15 50v8M24 50v8M32 50v8M40 50v8M49 50v8" ${K} fill="none"/>`,
+    tarak: `<path d="M13 30v20M20 30v20M27 30v20M34 30v20M41 30v20M48 30v20" fill="none" stroke="#3b1f4a" stroke-width="4" stroke-linecap="round"/><rect x="7" y="14" width="50" height="17" rx="6" fill="#b06cf0" ${K}/>`,
+    firca: `<rect x="36" y="36" width="26" height="10" rx="5" transform="rotate(38 36 36)" fill="#ff8a5c" ${K}/><ellipse cx="24" cy="25" rx="18" ry="15" fill="#ff8a5c" ${K}/><path d="M13 21v9M19 17v15M25 16v17M31 17v15M36 21v9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`,
+    makas: `<path d="M24 39L47 7" fill="none" stroke="#9aa5b1" stroke-width="7" stroke-linecap="round"/><path d="M40 39L17 7" fill="none" stroke="#b8c2cc" stroke-width="7" stroke-linecap="round"/><circle cx="18" cy="47" r="9" fill="none" stroke="#e8418a" stroke-width="6"/><circle cx="46" cy="47" r="9" fill="none" stroke="#e8418a" stroke-width="6"/><circle cx="32" cy="28" r="3" fill="#3b1f4a"/>`,
+    fon: `<rect x="17" y="34" width="13" height="26" rx="6" fill="#ff6fae" ${K}/><rect x="36" y="14" width="22" height="20" rx="4" fill="#ffb3d1" ${K}/><circle cx="25" cy="24" r="17" fill="#ff6fae" ${K}/><circle cx="25" cy="24" r="7" fill="#fff"/>`,
+    toka: `<rect x="7" y="42" width="50" height="11" rx="5.5" fill="#b8c2cc" ${K}/><path d="M32 5l7 14 15 2-11 11 3 15-14-7-14 7 3-15L10 21l15-2z" fill="#7fd8c3" ${K}/>`,
+    cicek: `<g fill="#ff8fc7" ${K}><circle cx="32" cy="14" r="11"/><circle cx="49" cy="26" r="11"/><circle cx="43" cy="46" r="11"/><circle cx="21" cy="46" r="11"/><circle cx="15" cy="26" r="11"/></g><circle cx="32" cy="32" r="10" fill="#ffc928" ${K}/>`,
+    tac: `<path d="M8 52L5 18l15 14L32 8l12 24 15-14-3 34z" fill="#ffc928" ${K}/><circle cx="32" cy="40" r="5.5" fill="#ef3b4d"/><circle cx="17" cy="43" r="3.8" fill="#3d8bff"/><circle cx="47" cy="43" r="3.8" fill="#2fb86b"/>`,
+    parfum: `<rect x="15" y="28" width="34" height="31" rx="9" fill="#c9a7ff" ${K}/><rect x="25" y="15" width="14" height="13" rx="2.5" fill="#ffc928" ${K}/><path d="M32 36l3 6 6.5 1-4.7 4.5 1 6.5-5.8-3-5.8 3 1-6.5-4.7-4.5 6.5-1z" fill="#fff"/><circle cx="49" cy="11" r="2.8" fill="#7cc8ff"/><circle cx="56" cy="7" r="2.2" fill="#7cc8ff"/><circle cx="57" cy="17" r="2.2" fill="#7cc8ff"/>`,
+    ayna: `<rect x="27" y="41" width="10" height="21" rx="5" fill="#e8418a" ${K}/><circle cx="32" cy="24" r="19" fill="#bfe9ff" stroke="#e8418a" stroke-width="6"/><path d="M21 21q4-9 13-10" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
+  };
+  const bow = c && `<path d="M28 36l-9 22 11-6 4-13z" fill="${c}" ${K}/><path d="M36 36l9 22-11-6-4-13z" fill="${c}" ${K}/><path d="M32 32L7 15Q0 32 7 49z" fill="${c}" ${K}/><path d="M32 32L57 15Q64 32 57 49z" fill="${c}" ${K}/><circle cx="32" cy="32" r="8.5" fill="${c}" ${K}/>`;
+  return '<svg viewBox="0 0 64 64" aria-hidden="true">' + (bow || art[id]) + '</svg>';
+}
+const ICON_PLAY = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M13 7l20 13-20 13z" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round"/></svg>';
+const ICON_OK = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 21l9 9 17-19" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_AGAIN = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M32 20a12 12 0 1 1-4-9" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M30 3v10H20z" fill="#fff"/></svg>';
+
+/* =====================================================================
+   Sound: recorded clips, played through the game's own audio output
+   ===================================================================== */
+let AC = null, master = null, curSrc = null, curFin = null, playSeq = 0, talk = 0;
+function wake() { if (AC && AC.state !== 'running') { try { const p = AC.resume(); if (p && p.catch) p.catch(() => {}); } catch (e) {} } }
+function initAudio() {
+  if (AC) { wake(); return; }
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}   // keep playing when an iPad is set to silent
+  try { const C = window.AudioContext || window.webkitAudioContext; AC = new C(); master = AC.createGain(); master.connect(AC.destination); wake(); } catch (e) { AC = null; }
+}
+const decoded = new Map();
+function buffer(id) {
+  if (decoded.has(id)) return decoded.get(id);
+  const bin = atob(PACK.data[id]), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const p = new Promise((res, rej) => { try { const r = AC.decodeAudioData(bytes.buffer, res, rej); if (r && r.catch) r.catch(rej); } catch (e) { rej(e); } });
+  decoded.set(id, p); return p;
+}
+function stopSound() {
+  playSeq++;
+  if (curSrc) { try { curSrc.onended = null; curSrc.stop(); } catch (e) {} curSrc = null; }
+  if (curFin) { const f = curFin; curFin = null; f(); }
+}
+// Play one clip. Resolves when it ends, or at once if something newer starts.
+function play(id) {
+  return new Promise(resolve => {
+    stopSound();
+    const my = playSeq; let done = false;
+    const fin = () => { if (!done) { done = true; if (curFin === fin) curFin = null; resolve(); } };
+    curFin = fin;
+    if (!PACK || !AC || !PACK.data[id]) { setTimeout(fin, 700); return; }
+    wake();
+    const guard = setTimeout(fin, (PACK.seconds[id] || 2) * 1000 + 900);
+    buffer(id).then(buf => {
+      if (my !== playSeq) return;
+      const s = AC.createBufferSource(); s.buffer = buf; s.connect(master);
+      s.onended = () => { if (curSrc === s) curSrc = null; clearTimeout(guard); fin(); };
+      curSrc = s; s.start();
+    }).catch(() => { clearTimeout(guard); fin(); });
+  });
+}
+// Say clips one after another. Returns false if something else started talking first.
+async function say(ids, onEach) {
+  const my = ++talk; S.last = ids;
+  for (let i = 0; i < ids.length; i++) { if (my !== talk) return false; if (onEach) onEach(ids[i], i); await play(ids[i]); }
+  return my === talk;
+}
+const sayLine = id => { show(LINES[id][0], LINES[id][1]); return say(['line/' + id]); };
+
+/* =====================================================================
+   The pony
+   ===================================================================== */
+const pony = $('pony'), bounce = $('bounce'), fx = $('fx');
+const NS = 'http://www.w3.org/2000/svg';
+function setMane(state) { pony.dataset.mane = state; }
+function wear(what, on) { $('acc-' + what).classList.toggle('off', !on); }
+function resetPony(mane) { setMane(mane); ['bow', 'cicek', 'tac', 'toka'].forEach(a => wear(a, false)); fx.textContent = ''; }
+function hop(cls) { if (reduce) return; bounce.classList.remove('jump', 'twirl'); void bounce.getBoundingClientRect(); bounce.classList.add(cls || 'jump'); setTimeout(() => bounce.classList.remove(cls || 'jump'), cls === 'twirl' ? 1150 : 520); }
+function burst(kind) {
+  if (reduce) return;
+  const n = kind === 'drops' ? 14 : 10;
+  for (let i = 0; i < n; i++) {
+    const x = 205 + Math.random() * 120, y = 60 + Math.random() * 130; let el;
+    if (kind === 'bubbles') { el = document.createElementNS(NS, 'circle'); el.setAttribute('cx', x); el.setAttribute('cy', y); el.setAttribute('r', 6 + Math.random() * 9); el.setAttribute('class', 'sud fx-bub'); }
+    else if (kind === 'drops') { el = document.createElementNS(NS, 'ellipse'); el.setAttribute('cx', x); el.setAttribute('cy', y - 30); el.setAttribute('rx', 4); el.setAttribute('ry', 8); el.setAttribute('fill', '#4db8ff'); el.setAttribute('class', 'fx-drop'); }
+    else if (kind === 'snip') { el = document.createElementNS(NS, 'rect'); el.setAttribute('x', x - 30); el.setAttribute('y', y + 20); el.setAttribute('width', 14); el.setAttribute('height', 6); el.setAttribute('rx', 3); el.setAttribute('fill', '#ff7fbf'); el.setAttribute('stroke', '#3b1f4a'); el.setAttribute('stroke-width', 2); el.setAttribute('class', 'fx-snip'); }
+    else { el = document.createElementNS(NS, 'path'); el.setAttribute('d', `M${x} ${y - 12}l3 9 9 3-9 3-3 9-3-9-9-3 9-3z`); el.setAttribute('fill', '#ffc928'); el.setAttribute('stroke', '#3b1f4a'); el.setAttribute('stroke-width', 2); el.setAttribute('class', 'fx-spark'); }
+    el.style.animationDelay = (Math.random() * 0.35) + 's';
+    fx.append(el); setTimeout(() => el.remove(), 2000);
+  }
+}
+function confetti() {
+  if (reduce) return;
+  const box = $('confetti'), cols = COLORS.map(c => c.hex);
+  for (let i = 0; i < 46; i++) { const p = document.createElement('i'); p.style.left = Math.random() * 100 + '%'; p.style.background = pick(cols); p.style.animationDelay = Math.random() * 0.9 + 's'; p.style.animationDuration = 2 + Math.random() * 1.4 + 's'; box.append(p); setTimeout(() => p.remove(), 4200); }
+}
+// The picture on a button flies up to the pony.
+function fly(btn) {
+  if (reduce) return Promise.resolve();
+  const r = btn.getBoundingClientRect(), h = $('headspot').getBoundingClientRect();
+  const ghost = btn.firstElementChild.cloneNode(true); ghost.classList.add('ghost');
+  ghost.style.left = r.left + 'px'; ghost.style.top = r.top + 'px'; ghost.style.width = r.width + 'px'; ghost.style.height = r.height + 'px';
+  document.body.append(ghost);
+  const dx = h.left + h.width / 2 - (r.left + r.width / 2), dy = h.top + h.height / 2 - (r.top + r.height / 2);
+  return new Promise(res => {
+    let done = false; const end = () => { if (!done) { done = true; ghost.remove(); res(); } };
+    try { ghost.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${dx}px,${dy}px) scale(.45)`, opacity: .3 }], { duration: 520, easing: 'cubic-bezier(.3,.7,.3,1)' }).onfinish = end; } catch (e) { end(); }
+    setTimeout(end, 800);
+  });
+}
+
+/* =====================================================================
+   The game
+   ===================================================================== */
+const S = { mode: 'title', names: [], picking: [], visit: 0, steps: [], i: 0, wrong: 0, busy: false, worn: 0, last: [] };
+const shelf = $('shelf');
+function show(tr, en) { $('word').textContent = tr; $('gloss').textContent = en || ''; }
+function setMode(m) { S.mode = m; document.body.dataset.mode = m; }
+function fullName() { return S.names.map(id => nameOf[id].show).join(' '); }
+function drawTag(ids) { const t = $('tag'); t.textContent = ids.map(id => nameOf[id].show).join(' '); t.hidden = !ids.length; }
+function bigButton(icon, label, onTap) { const b = document.createElement('button'); b.className = 'go'; b.innerHTML = icon; b.setAttribute('aria-label', label); b.onclick = onTap; return b; }
+function loadNames() { try { const v = JSON.parse(localStorage.getItem('lm-names') || '[]'); if (Array.isArray(v)) return v.filter(id => nameOf[id]).slice(0, MAX_NAMES); } catch (e) {} return []; }
+function saveNames() { try { localStorage.setItem('lm-names', JSON.stringify(S.names)); } catch (e) {} }
+
+function showTitle() {
+  setMode('title'); S.busy = false; resetPony('combed'); $('steps').textContent = ''; drawTag(S.names);
+  show("Leyla'nın Midillisi", "Leyla's pony");
+  shelf.textContent = '';
+  shelf.append(bigButton(ICON_PLAY, 'Oyna', () => { initAudio(); if (S.names.length) startVisit(true); else startNaming(true); }));
+}
+
+function startNaming(first) {
+  setMode('naming'); S.busy = false; S.picking = []; drawTag([]); $('steps').textContent = ''; resetPony('combed');
+  shelf.textContent = '';
+  const ok = bigButton(ICON_OK, 'Tamam', confirmNames); ok.disabled = true; ok.id = 'ok';
+  NAMES.forEach(n => {
+    const b = document.createElement('button'); b.className = 'chip'; b.id = 'name-' + n.id; b.innerHTML = '<span>' + n.icon + '</span>' + n.show;
+    b.onclick = () => {
+      if (S.busy) return;
+      const at = S.picking.indexOf(n.id);
+      if (at >= 0) S.picking.splice(at, 1); else if (S.picking.length < MAX_NAMES) S.picking.push(n.id); else { b.classList.add('wobble'); setTimeout(() => b.classList.remove('wobble'), 500); }
+      b.classList.toggle('on', S.picking.indexOf(n.id) >= 0);
+      drawTag(S.picking); ok.disabled = !S.picking.length;
+      show(S.picking.length ? S.picking.map(id => nameOf[id].show).join(' ') : LINES.who[0], S.picking.length ? '' : LINES.who[1]);
+      hop(); say(['name/' + n.id]);
+    };
+    shelf.append(b);
+  });
+  shelf.append(ok);
+  show(LINES.who[0], LINES.who[1]);
+  say(first ? ['line/hello', 'line/who'] : ['line/who'], id => { const k = id.slice(5); show(LINES[k][0], LINES[k][1]); });
+}
+async function confirmNames() {
+  if (S.busy || !S.picking.length) return;
+  S.busy = true; S.names = S.picking.slice(); saveNames(); drawTag(S.names); shelf.textContent = '';
+  show('Benim adım ' + fullName() + '!', 'My name is ' + fullName() + '!');
+  await say(['line/myname'].concat(S.names.map(id => 'name/' + id), ['line/funny']), id => { if (id.indexOf('name/') === 0) hop(); if (id === 'line/funny') { hop('twirl'); show(LINES.funny[0], LINES.funny[1]); } });
+  startVisit(false);
+}
+
+// One visit to the salon: wash, rinse, dry, comb, maybe a trim, blow-dry, a ribbon of some color, something pretty, maybe perfume, then the mirror.
+function plan() {
+  const steps = [pick(['sampuan', 'sabun']), 'su', 'havlu', pick(['tarak', 'firca'])];
+  if (Math.random() < 0.6) steps.push('makas');
+  steps.push('fon', 'kurdele-' + pick(COLORS).id, pick(['toka', 'cicek', 'tac']));
+  if (Math.random() < 0.6) steps.push('parfum');
+  steps.push('ayna');
+  return steps;
+}
+// How many pictures to choose from: two at the very start, then three, and four once she has played a few times.
+function choicesFor(target) {
+  const n = S.visit <= 1 ? (S.i < 3 ? 2 : 3) : S.visit >= 4 ? 4 : 3;
+  const pool = target.indexOf('kurdele-') === 0 ? COLORS.map(c => 'kurdele-' + c.id).filter(x => x !== target) : ITEMS.map(i => i.id).filter(x => x !== target && x !== TWIN[target]);
+  return shuffle([target].concat(shuffle(pool).slice(0, n - 1)));
+}
+function drawSteps() { const el = $('steps'); el.textContent = ''; S.steps.forEach((s, i) => { const d = document.createElement('i'); d.className = i < S.i ? 'done' : i === S.i ? 'now' : ''; el.append(d); }); }
+
+async function startVisit(hello) {
+  setMode('salon'); S.busy = true; S.visit++; S.steps = plan(); S.i = 0; S.worn = 0; resetPony('messy'); drawTag(S.names); drawSteps(); shelf.textContent = '';
+  await say(hello ? ['line/hello', 'line/messy'] : ['line/messy'], id => { const k = id.slice(5); show(LINES[k][0], LINES[k][1]); });
+  nextStep();
+}
+function ask() { const t = S.steps[S.i], inf = info(t); show(inf.tr + '!', inf.en); return say(['ask/' + t]); }
+function nextStep() {
+  if (S.i >= S.steps.length) { finale(); return; }
+  S.wrong = 0; drawSteps(); shelf.textContent = '';
+  choicesFor(S.steps[S.i]).forEach(id => {
+    const b = document.createElement('button'); b.className = 'pick'; b.id = 'pick-' + id; b.innerHTML = drawing(id); b.setAttribute('aria-label', info(id).tr);
+    b.onclick = () => choose(b, id); shelf.append(b);
+  });
+  S.busy = false; ask();
+}
+async function choose(btn, id) {
+  if (S.busy || S.mode !== 'salon') return;
+  S.busy = true;
+  const target = S.steps[S.i], inf = info(id);
+  show(inf.tr, inf.en);                                             // whatever she touches says its own name
+  if (id !== target) {
+    S.wrong++; btn.classList.add('wobble');
+    await say(['word/' + id]); btn.classList.remove('wobble');
+    if (S.wrong >= 2) { const right = $('pick-' + target); if (right) right.classList.add('hint'); }   // after two misses the right one glows
+    if (S.wrong === 2) await sayLine('lookagain');
+    S.busy = false; ask(); return;
+  }
+  btn.classList.add('right'); shelf.querySelectorAll('.pick').forEach(b => { b.disabled = true; b.classList.remove('hint'); });
+  const spoken = say(['word/' + id]);
+  await fly(btn); btn.style.visibility = 'hidden';
+  let reaction;
+  if (EFFECT[target]) { const e = EFFECT[target]; if (e[0]) setMane(e[0]); burst(e[1]); reaction = e[2]; }
+  else if (target === 'ayna') reaction = null;
+  else { if (inf.hex) { pony.style.setProperty('--bow', inf.hex); wear('bow', true); } else wear(target, true); burst('spark'); reaction = S.worn++ ? pick(PRAISE) : 'fx_wear'; }
+  hop(); await spoken;
+  S.i++; drawSteps();
+  if (reaction) await sayLine(reaction);
+  nextStep();
+}
+async function finale() {
+  setMode('finale'); S.busy = true; shelf.textContent = ''; confetti(); hop('twirl'); burst('spark');
+  await sayLine('done');
+  show(fullName() + '!', '');
+  await say(S.names.map(id => 'name/' + id), () => hop());
+  hop('twirl'); confetti();
+  shelf.append(bigButton(ICON_AGAIN, 'Tekrar oyna', () => { initAudio(); startVisit(false); }));
+  S.busy = false; sayLine('again');
+}
+
+// Tapping the pony tickles her. Tapping her name tag lets Leyla rename her (not in the middle of a visit).
+pony.addEventListener('click', () => {
+  if (S.busy || (S.mode !== 'salon' && S.mode !== 'finale')) return;
+  hop(); const wasSalon = S.mode === 'salon';
+  sayLine('tickle').then(ok => { if (ok && wasSalon && S.mode === 'salon' && !S.busy) ask(); });
+});
+$('tag').onclick = () => { if (S.busy || S.mode === 'salon' || S.mode === 'naming') return; initAudio(); startNaming(false); };
+$('again').onclick = () => { initAudio(); if (S.busy || !S.last.length) return; if (S.mode === 'salon') ask(); else say(S.last); };
+['pointerdown', 'keydown', 'touchend'].forEach(t => window.addEventListener(t, wake, true));
+document.addEventListener('visibilitychange', () => { if (document.hidden) stopSound(); });
+
+S.names = loadNames();
+showTitle();
+window.__lm = { S, choose, startVisit, startNaming, showTitle, finale, info, ITEMS, COLORS, NAMES, LINES };   // handle for testing
+})();
+</script>

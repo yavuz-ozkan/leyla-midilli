@@ -1,0 +1,6 @@
+# Made from the clips in audio/ by tools/make-audio.mjs. The copy the site serves is docs/audio-pack.js.
+/audio-pack.js
+# Never commit an API key.
+elevenlabs-key.txt
+*.key
+.env
